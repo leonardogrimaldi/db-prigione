@@ -1,5 +1,5 @@
 # db-prigione
-Sito di gestione di una prigione
+Gestionale di una prigione
 
 L'obiettivo del progetto è realizzare un sistema di gestione di una prigione che consenta al personale di gestire i prigionieri e le guardie.
 
