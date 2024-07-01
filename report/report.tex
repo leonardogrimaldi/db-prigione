@@ -42,8 +42,21 @@ Questo include la data e ora di uscita e in quale cella è avvenuto lo spostamen
 %
 Ogni cella appartiene a un blocco che deve essere pattugliato da una o più guardie.
 %
-I turni di pattuglia sono assegnati in base a un orario, con due turni da 3 ore e 30 minuti per guardia, con 30 minuti di pausa intermedia. Il sistema non dovrà gestire la copertura della pausa, si suppone che vi saranno guardie di riserva che subetrano per un periodo temporaneo.
-
+I turni di pattuglia sono assegnati in base a un orario prestabilito in cui ogni giorno della settimana è formato da 3 turni:
+\begin{itemize}
+    \item Mattina: 06:00 - 14:00
+    \item Pomeriggio/sera: 14:00 - 22:00
+    \item Notte: 22:00 - 06:00 (del giorno successivo)
+\end{itemize}
+La guardia lavorerà quindi per 8 ore al giorno con una pausa intermedia di 30 minuti e fine turno di 30 minuti.
+%
+Le pause e i cambi di turno non verranno gestiti dal database ai fini di copertura dell'orario, ma si suppone che vi sia una guardia di riserva che subentra temporaneamente.
+%
+\\Il personale del carcere è formato quindi a guardie, ma anche da amministratori e di entrambi si vuole memorizzare: il nome, cognome, data di nascita, sesso e codice fiscale.
+%
+Gli amministratori sono le persone che hanno accesso al sistema gestionale e possono essere anche le guardie stesse.
+%
+Sia le guardie che gli amministratori possiedeno un badge che li identifica univocamente all'interno della struttura.
 
 \section{Analisi dei requisiti}
 
