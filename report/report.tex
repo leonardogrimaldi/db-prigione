@@ -22,15 +22,15 @@
 \section{Introduzione}
 Viene commissionata da un ente governativo la realizzazione di un software gestionale per una casa circondariale che faciliti il tracciamento di detenuti e loro spostamenti.
 \section{Intervista}
-Si chiede di realizzare un portale dove poter inserire i detenuti in arrivo e memorizzare gli estremi della persona.
+Si chiede di realizzare un portale che consenta di gestire e storicizzare varie operazioni comuni di un carcere. Per i detenuti in arrivo si vogliono memorizzare gli estremi della persona.
 %
 I dati richiesti sono:
 \begin{itemize}
     \item Nome, cognome, data di nascita, il numero della carta d'identità, altezza
 \end{itemize}
-Nel caso in cui il prigioniero non abbia la C.I. verrà usato il passaporto oppure l'impronta digitale.
+Il carcere gestisce solamente detenuti italiani maggiorenni in possesso di carta d'identità quindi non occorre gestire il caso in cui essa non sia presente.
 %
-All'interno del carcere è presente un lettore di impronte digitali ed è necessario salvare le impronte di ognuno.
+Un detenuto può essere rilasciato e rientrare nel carcere, ma anche decedere durante la sua permanenza.
 %
 Ai detenuti sono assegnate delle celle letto in base alla disponibilità.
 %
@@ -40,7 +40,7 @@ Questo include la data e ora di uscita e in quale cella è avvenuto lo spostamen
 %
 \\All'interno della prigione sono presenti anche celle mediche e solitarie all'interno delle quali il prigioniero può risiedere temporaneamente.
 %
-Ogni cella appartiene a un blocco che deve essere pattugliato da una o più guardie.
+Ogni cella appartiene a un blocco che viene pattugliato da una o più guardie.
 %
 I turni di pattuglia sono assegnati in base a un orario prestabilito in cui ogni giorno della settimana è formato da 3 turni:
 \begin{itemize}
@@ -52,14 +52,17 @@ La guardia lavorerà quindi per 8 ore al giorno con una pausa intermedia di 30 m
 %
 Le pause e i cambi di turno non verranno gestiti dal database ai fini di copertura dell'orario, ma si suppone che vi sia una guardia di riserva che subentra temporaneamente.
 %
-\\Il personale del carcere è formato quindi a guardie, ma anche da amministratori e di entrambi si vuole memorizzare: il nome, cognome, data di nascita, sesso e codice fiscale.
+\\Il personale del carcere è formato quindi da guardie, ma anche da amministratori e di entrambi si vuole memorizzare: il nome, cognome, data di nascita, sesso e codice fiscale.
 %
 Gli amministratori sono le persone che hanno accesso al sistema gestionale e possono essere anche le guardie stesse.
 %
 Sia le guardie che gli amministratori possiedeno un badge che li identifica univocamente all'interno della struttura.
-
+%
+Di loro si vuole memorizzare inoltre: 
+\begin{itemize}
+    \item Nome, cognome, codice fiscale e sesso.
+\end{itemize}
 \section{Analisi dei requisiti}
-
 Realizzare uno script Python per monitorare lo stato di una rete, controllando la disponibilità di uno o più host tramite il protocollo ICMP (ping).
 %
 Lo script deve consentire all'utente di specificare gli indirizzi IP degli host da monitorare e deve visualizzare lo stato (online/offline) di ciascun host.
