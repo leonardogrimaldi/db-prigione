@@ -6,9 +6,9 @@
 \usepackage{hyperref}
 \usepackage{minted}
 \usepackage{lineno}
-
 % Questo commentalo se vuoi scrivere in inglese.
 \usepackage[italian]{babel}
+\graphicspath{{./images/}}
 
 \usepackage[italian]{cleveref}
 \title{Relazione dell'elaborato di Basi di Dati
@@ -39,11 +39,12 @@ Ai detenuti sono assegnate delle \textbf{celle} \underline{letto} in base alla d
 %
 Esse hanno una capacità e più prigionieri possono risiedere al loro interno.
 %
-\\Nel corso della loro permanenza le assegnazioni possono subire variazioni e si dovrà quindi tenere traccia degli \textbf{spostamenti}.
+\par
+Nel corso della loro permanenza le assegnazioni possono subire variazioni e si dovrà quindi tenere traccia degli \textbf{spostamenti}.
 %
 Questo include la data e ora di uscita e in quale cella è avvenuto lo spostamento.
 %
-\\All'interno della prigione sono presenti anche celle \underline{mediche} e \underline{solitarie} all'interno delle quali il prigioniero può risiedere temporaneamente.
+All'interno della prigione sono presenti anche celle \underline{mediche} e \underline{solitarie} all'interno delle quali il prigioniero può risiedere temporaneamente.
 %
 Ogni cella appartiene a un \textbf{blocco} che viene pattugliato da una o più \underline{guardie}.
 %
@@ -57,7 +58,7 @@ La guardia lavorerà quindi per 8 ore al giorno con una pausa intermedia di 30 m
 %
 Le pause e i cambi di turno non verranno gestiti dal database ai fini di copertura dell'orario, ma si suppone che vi sia una guardia di riserva che subentra temporaneamente.
 %
-\\Il \textbf{personale} del carcere è formato quindi da guardie, ma anche da \textunderscore{amministratori} e di entrambi si vuole memorizzare: il nome, cognome, data di nascita, sesso e codice fiscale.
+\par Il \textbf{personale} del carcere è formato quindi da guardie, ma anche da \underline{amministratori} e di entrambi si vuole memorizzare: il nome, cognome, data di nascita, sesso e codice fiscale.
 %
 Gli amministratori sono le persone che hanno accesso al sistema gestionale e possono essere anche le guardie stesse.
 %
@@ -112,6 +113,35 @@ Gli amministratori possono essere anche delle guardie.
     \item Gestione detenuti: registrazione, trasferimento
 \end{itemize}
 \subsection*{Orario}
+L'orario di lavoro che sarà assegnato alle guardie.
+%
+Avrà tre turni: mattina (06:00 - 14:00), pomeriggio (14:00 - 22:00) e notte (22:00 - 06:00).
 \chapter{Progettazione concettuale}
 \section{Schema scheletro}
+\includegraphics[angle=-90]{er_scheletro_prigione}
+\section{Raffinamenti proposti}
+Lo schema scheletro è una rappresentazione fedele ai concetti principali estratti nella sezione precedente, ma contiene anche un paio di elementi aggiuntivi che è stato necessario definire per modellare correttamente il dominio.
+%
+Innanzitutto si può notare la nuova entità TRASFERIMENTO che consentirà di conservare le informazioni sui cambi di celle dei detenuti.
+%
+Questa ha una cardinalità 1-1 sia dalla parte CELLA che da quella DETENUTO perché un TRASFERIMENTO non può esistere se manca un riferimento a chi e dove è stato spostato.
+%
+\par
+Un'altra aggiunta importante è il concetto di REGISTRO; dall'intervista si è analizzato che un prigioniero potrebbe rientrare nel sistema e quindi si è creata la necessità di tenere traccia di questi.
+%
+In questo modo un detenuto può essere reinserito nel sistema senza perdere informazioni sui suoi incarceramenti passati.
+%
+L'ORARIO, invece, è stato modellato associandolo a una specializzazione totale ed esclusiva di TURNO formata da MATTINO, POMERIGGIO e NOTTE.
+%
+\par La relazione ternaria di nome 'controllo' è stata introdotta per consentire alle GUARDIE di avere un ORARIO e BLOCCO assegnato, ma anche di poter avere più guardie a controllare un certo blocco.
+%
+\begin{itemize}
+    \item Una coppia guardia e orario avrà solo un blocco da controllare e quindi cardinalità 1-1 dalla parte blocco della relazione
+    \item Una coppia guardia e blocco può avere più orari
+    \item Una coppia blocco orario può essere pattugliata da molteplici guardie come detto prima.
+\end{itemize}
+\section{Schema concettuale finale}
+\includegraphics[angle=-90]{er_finale_prigione}
+\chapter{Progettazione logica}
+\section{Stima del volume dei dati}
 \end{document}
