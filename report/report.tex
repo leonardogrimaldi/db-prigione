@@ -144,4 +144,49 @@ L'ORARIO, invece, è stato modellato associandolo a una specializzazione totale 
 %\includegraphics[angle=-90]{er_finale_prigione}
 \chapter{Progettazione logica}
 \section{Stima del volume dei dati}
+\begin{table}[]
+\begin{tabular}{lll}
+\hline
+Concetto & Costrutto & Volume \\ \hline
+DETENUTO & E & 500 \\
+trasf\_detenuto & A & 1500 \\
+TRASFERIMENTO & E &  1500 \\
+registro\_detenuto & A & 700 \\
+REGISTRO & E & 700 \\
+trasf\_cella & A &  \\
+CELLA & E &  \\
+MEDICA & E & \\
+LETTO & E & \\
+SOLITARIA & E & \\
+appartiene & A & \\
+BLOCCO & E & \\
+controllo & A & \\
+GUARDIA & E & \\
+AMMINISTRATORE & E & \\
+PERSONALE & E & \\
+ORARIO & E & \\
+orario\_turno & A & \\
+TURNO & E & \\
+MATTINA & E & \\
+POMERIGGIO & E & \\
+NOTTE & E &
+\end{tabular}
+\end{table}
+\section{Descrizione delle operazioni principali e stima della loro frequenza}
+\begin{table}[]
+\begin{tabular}{lll}
+\hline
+Operazione & Frequenza & Tipo \\ \hline
+Inserimento nuovo detenuto & 2/giorno &  \\
+Cambio cella letto & 5/mese &  \\
+Trasferimento in cella medica & 5/mese & \\
+Trasferimento in cella solitaria & 3/mese & \\
+Inserimento nel registro di un vecchio detenuto & 1/mese & \\
+Inserimento nuova guardia & 5/anno & \\
+Eliminazione guardia & 5/anno & \\
+Cambio orario guardia & 6/mese & \\
+
+\end{tabular}
+\end{table}
+
 \end{document}
