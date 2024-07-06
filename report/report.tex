@@ -6,6 +6,8 @@
 \usepackage{hyperref}
 \usepackage{minted}
 \usepackage{lineno}
+\usepackage{array}
+\usepackage{tabularray}
 % Questo commentalo se vuoi scrivere in inglese.
 \usepackage[italian]{babel}
 \graphicspath{{./images/}}
@@ -144,7 +146,7 @@ L'ORARIO, invece, è stato modellato associandolo a una specializzazione totale 
 %\includegraphics[angle=-90]{er_finale_prigione}
 \chapter{Progettazione logica}
 \section{Stima del volume dei dati}
-\begin{table}[]
+\begin{table}[H]
 \begin{tabular}{lll}
 \hline
 Concetto & Costrutto & Volume \\ \hline
@@ -173,8 +175,8 @@ NOTTE & E &
 \end{tabular}
 \end{table}
 \section{Descrizione delle operazioni principali e stima della loro frequenza}
-\begin{table}[]
-\begin{tabular}{lll}
+\begin{table}[H]
+\begin{tabular}{p{9cm} p{2cm} p{1cm}}
 \hline
 Operazione & Frequenza & Tipo \\ \hline
 Inserimento nuovo detenuto & 2/giorno &  \\
@@ -183,10 +185,13 @@ Trasferimento in cella medica & 5/mese & \\
 Trasferimento in cella solitaria & 3/mese & \\
 Inserimento nel registro di un vecchio detenuto & 1/mese & \\
 Inserimento nuova guardia & 5/anno & \\
+Inserimento nuovo amministratore & 2/anno & \\
 Eliminazione guardia & 5/anno & \\
 Cambio orario guardia & 6/mese & \\
-
+Visualizzare la lista dei detenuti presenti & 50/giorno & \\
+Visualizzare i detenuti rientrati in prigione & 2/mese & \\
+Visualizzare l'andamento di nuovi detenuti & 60/giorno & \\
+Visualizzare i primi 5 detenuti che sono stati trasferiti in celle solitarie più volte & 2/mese &
 \end{tabular}
 \end{table}
-
 \end{document}
