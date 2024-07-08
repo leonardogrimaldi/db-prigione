@@ -1,6 +1,6 @@
 export default function DataTable() {
     return (
-        <table className="table-auto">
+        <table className="table-auto w-full">
             <thead>
                 <tr>
                     <th>Song</th>
