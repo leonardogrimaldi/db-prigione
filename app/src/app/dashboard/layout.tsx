@@ -1,18 +1,26 @@
+import Link from "next/link"
+
 function NavBar() {
     return (
         <nav className="flex flex-col justify-start h-screen bg-white">
             <div className="h-20 p-2">
                 DB-Prigione
             </div>
-            <div className="p-2">
-                Home
-            </div>
-            <div className="p-2">
-                Detenuti
-            </div>
+            <Link href="/dashboard/">
+                <div className="p-2">
+                    Home
+                </div>
+            </Link>
+            <Link href="/dashboard/detenuti">
+                <div className="p-2">
+                    Detenuti
+                </div>
+            </Link>
+            <Link href="/dashboard/guardie">
             <div className="p-2">
                 Guardie
             </div>
+            </Link>
         </nav>
     )
 }

@@ -1,6 +1,6 @@
-export default function FormIsolamento() {
+export default function FormTrasferimento() {
     return (
-        <form className="bg-blue-50 pt-5 pl-5 rounded-lg">
+        <form className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
             <div className="flex flex-col">
                 <div className="p-3 flex flex-row gap-x-5">
                     <div className="flex flex-col w-full ">
@@ -13,26 +13,28 @@ export default function FormIsolamento() {
                     </div>
                 </div>
                 <div className="p-3 flex flex-row gap-x-5">
-                    <div className="flex flex-col w-1/2">
-                        <label htmlFor="celle_solitarie">A:</label>
-                        <select className="py-2 px-2" name="celle_solitarie">
-                            <option label=" ">Scegli una cella solitaria</option>
+                    <div className="flex flex-col w-full">
+                        <label htmlFor="celleLetto">Da:</label>
+                        <input className="py-2 px-2" value="Cella C42" type="text" name="id_cella" readOnly/>
+                    </div>
+                    <div className="flex flex-col w-full">
+                        <label htmlFor="celleLetto">A:</label>
+                        <select className="py-2 px-2" name="celleLetto">
+                            <option label=" ">Scegli una cella</option>
                             <option value="volvo">Volvo</option>
                             <option value="saab">Saab</option>
                         </select>
                     </div>
-                    <div className="flex flex-col w-1/4">
-                        <label htmlFor="data_inizio">Data inizio:</label>
-                        <input className="py-2 px-2" type="date" name="data_inizio"/>
-                    </div>
-                    <div className="flex flex-col w-1/4">
-                        <label htmlFor="data_fine">Data fine:</label>
-                        <input className="py-2 px-2" type="date" name="data_fine"/>
-                    </div>
                 </div>
-                <div className="p-3 flex flex-col gap-x-5">
-                    <label htmlFor="prognosi">Motivo:</label>
-                    <textarea className="resize-none py-2 px-2" name="prognosi" rows={5} placeholder="Scrivi qui il motivo per il quale il paziente è stato detenuto."></textarea>
+                <div className="invisible p-3 flex flex-row gap-x-5 justify-end">
+                    <div className="flex flex-col w-1/2">
+                        <label htmlFor="celleLetto">Con:</label>
+                        <select className="py-2 px-2" name="celleLetto">
+                            <option label=" ">Scegli una cella</option>
+                            <option value="volvo">Volvo</option>
+                            <option value="saab">Saab</option>
+                        </select>
+                    </div>
                 </div>
                 <div className="p-3 flex gap-x-5 justify-end">
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">Invia</button>

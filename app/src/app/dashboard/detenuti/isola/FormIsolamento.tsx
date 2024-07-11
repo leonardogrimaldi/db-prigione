@@ -1,6 +1,6 @@
-export default function FormRicovero() {
+export default function FormIsolamento() {
     return (
-        <form className="bg-blue-50 pt-5 pl-5 rounded-lg">
+        <form className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
             <div className="flex flex-col">
                 <div className="p-3 flex flex-row gap-x-5">
                     <div className="flex flex-col w-full ">
@@ -14,9 +14,9 @@ export default function FormRicovero() {
                 </div>
                 <div className="p-3 flex flex-row gap-x-5">
                     <div className="flex flex-col w-1/2">
-                        <label htmlFor="celle_mediche">A:</label>
-                        <select className="py-2 px-2" name="celle_mediche">
-                            <option label=" ">Scegli una cella medica</option>
+                        <label htmlFor="celle_solitarie">A:</label>
+                        <select className="py-2 px-2" name="celle_solitarie">
+                            <option label=" ">Scegli una cella solitaria</option>
                             <option value="volvo">Volvo</option>
                             <option value="saab">Saab</option>
                         </select>
@@ -31,8 +31,8 @@ export default function FormRicovero() {
                     </div>
                 </div>
                 <div className="p-3 flex flex-col gap-x-5">
-                    <label htmlFor="prognosi">Prognosi:</label>
-                    <textarea className="resize-none py-2 px-2" name="prognosi" rows={5} placeholder="Scrivi qui la prognosi del paziente detenuto."></textarea>
+                    <label htmlFor="prognosi">Motivo:</label>
+                    <textarea className="resize-none py-2 px-2" name="prognosi" rows={5} placeholder="Scrivi qui il motivo per il quale il paziente è stato detenuto."></textarea>
                 </div>
                 <div className="p-3 flex gap-x-5 justify-end">
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">Invia</button>
