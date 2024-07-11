@@ -48,7 +48,9 @@ Questo include la data e ora di uscita e in quale cella è avvenuto lo spostamen
 %
 All'interno della prigione sono presenti anche celle \underline{mediche} e \underline{solitarie} all'interno delle quali il prigioniero può risiedere temporaneamente.
 %
-Ogni cella appartiene a un \textbf{blocco} che viene pattugliato da una o più \underline{guardie}.
+Ogni cella appartiene a un \textbf{piano} che viene pattugliato da una o più \underline{guardie}.
+%
+Ogni piano fa parte di un solo \textbf{blocco} 
 %
 I \underline{turni di pattuglia} sono assegnati in base a un \textbf{orario} prestabilito in cui ogni giorno della settimana è formato da 3 turni:
 \begin{itemize}
@@ -94,17 +96,19 @@ In generale, il luogo dove risiede il carcerato.
 %
 Ha una capacità massima e può essere di tre tipi: letto, medica e solitaria.
 %
-Può appartenere a un solo blocco.
-\subsection*{Blocco}
-Parte strutturale del carcere dove sono presenti un insieme di celle.
+Può appartenere a un solo piano.
+\subsection*{Piano}
+Piano dell'edificio. In esso sono contenute molteplici celle.
 %
 Esso può essere controllato da una o più guardie.
+\subsection*{Blocco}
+Parte strutturale del carcere dove sono presenti un insieme di piani.
 \subsection*{Personale}
 L'insieme di persone che non sono detenuti, ma lavorano nel carcere e garantiscono la sicurezza e il suo corretto funzionamento.
 %
 Si dividono in guardie e amministratori e posseggono un badge.
 \subsubsection*{Guardie}
-Personale carcerario a cui è affidato il compito di controllare i blocchi in un certo turno del giorno 
+Personale carcerario a cui è affidato il compito di controllare i piani in un certo turno del giorno 
 \subsubsection*{Amministratori}
 Personale che può accedere al sistema software gestionale attraverso una password.
 %
