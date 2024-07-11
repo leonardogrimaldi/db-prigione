@@ -19,22 +19,27 @@ export default function NavBar() {
 
     return (
         <nav className="flex flex-col justify-start h-screen bg-white">
-            <div className="h-20 p-2">
+            <div className="h-20 p-2 text-2xl">
                 DB-Prigione
             </div>
             <Link href="/dashboard/">
-                <div id="home" className="pageLink p-2">
+                <div id="home" className="pageLink p-2 text-lg">
                     Home
                 </div>
             </Link>
             <Link href="/dashboard/detenuti">
-                <div id="detenuti" className="pageLink p-2">
+                <div id="detenuti" className="pageLink p-2 text-lg">
                     Detenuti
                 </div>
             </Link>
             <Link href="/dashboard/guardie">
-                <div id="guardie" className="pageLink p-2">
+                <div id="guardie" className="pageLink p-2 text-lg">
                     Guardie
+                </div>
+            </Link>
+            <Link href="/dashboard/orari">
+                <div id="orari" className="pageLink p-2 text-lg">
+                    Orari
                 </div>
             </Link>
         </nav>

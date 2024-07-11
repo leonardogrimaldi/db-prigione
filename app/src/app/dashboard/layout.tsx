@@ -7,8 +7,12 @@ export default function Layout({
   }) {
   return (
     <div className="flex flex-row gap-x-5">
+      <div>
         <NavBar></NavBar>
+      </div>
+      <div>
         {children}
+      </div>
     </div>
   )
 }
