@@ -50,7 +50,7 @@ All'interno della prigione sono presenti anche celle \underline{mediche} e \unde
 %
 Ogni cella appartiene a un \textbf{piano} che viene pattugliato da una o più \underline{guardie}.
 %
-Ogni piano fa parte di un solo \textbf{blocco} 
+Ogni piano fa parte di un solo \textbf{blocco}.
 %
 I \underline{turni di pattuglia} sono assegnati in base a un \textbf{orario} prestabilito in cui ogni giorno della settimana è formato da 3 turni:
 \begin{itemize}
@@ -128,54 +128,70 @@ Avrà tre turni: mattina (06:00 - 14:00), pomeriggio (14:00 - 22:00) e notte (22
 \section{Raffinamenti proposti}
 Lo schema scheletro è una rappresentazione fedele ai concetti principali estratti nella sezione precedente, ma contiene anche un paio di elementi aggiuntivi che è stato necessario definire per modellare correttamente il dominio.
 %
-Innanzitutto si può notare la nuova entità TRASFERIMENTO che consentirà di conservare le informazioni sui cambi di celle dei detenuti.
+Innanzitutto si possono notare le tre nuove entità TRASFERIMENTO\_LETTO, RICOVERO e ISOLAMENTO che consentiranno di conservare le informazioni sui cambi di celle dei detenuti e ulteriori informazioni come la prognosi oppure il motivo.
 %
-Questa ha una cardinalità 1-1 sia dalla parte CELLA che da quella DETENUTO perché un TRASFERIMENTO non può esistere se manca un riferimento a chi e dove è stato spostato.
+Tutte queste hanno una cardinalità 1-1 sia dalla parte delle corrispondenti specializzazioni che da quella del REGISTRO\_DETENZIONE (introdotto nel seguente paragrafo) perché un TRASFERIMENTO non può esistere se manca un riferimento a chi e dove è stato spostato.
 %
 \par
-Un'altra aggiunta importante è il concetto di REGISTRO; dall'intervista si è analizzato che un prigioniero potrebbe rientrare nel sistema e quindi si è creata la necessità di tenere traccia di questi.
+Un'altra aggiunta importante è il concetto di REGISTRO\_DETENUTO; dall'intervista si è analizzato che un prigioniero potrebbe rientrare nel sistema e quindi si è creata la necessità di tenere traccia di questi.
 %
-In questo modo un detenuto può essere reinserito nel sistema senza perdere informazioni sui suoi incarceramenti passati.
+Modellando così, un detenuto può essere reinserito nel sistema senza perdere informazioni sui suoi incarceramenti passati.
 %
-L'ORARIO, invece, è stato modellato associandolo a una specializzazione totale ed esclusiva di TURNO formata da MATTINO, POMERIGGIO e NOTTE.
+I TURNI, invece, sono in associazione 0-7 con l'ORARIO per esprimere il vincolo sul numero di giorni di una settimana (che infatti sono sette)
 %
-\par La relazione ternaria di nome 'controllo' è stata introdotta per consentire alle GUARDIE di avere un ORARIO e BLOCCO assegnato, ma anche di poter avere più guardie a controllare un certo blocco.
+\par
+L'entità REGISTRO\_ORARIO consente di storicizzare gli orari di lavoro delle GUARDIE per un certo PIANO.
 %
-\begin{itemize}
-    \item Una coppia guardia e orario avrà solo un blocco da controllare e quindi cardinalità 1-1 dalla parte blocco della relazione
-    \item Una coppia guardia e blocco può avere più orari
-    \item Una coppia blocco orario può essere pattugliata da molteplici guardie come detto prima.
-\end{itemize}
+Le cardinalità delle associazioni riferite a questa entità sono state ideate in modo tale da consentire a più GUARDIE di pattugliare un piano e una GUARDIA avere un solo PIANO da controllare in un ORARIO.
 \section{Schema concettuale finale}
 %\includegraphics[angle=-90]{er_finale_prigione}
 \chapter{Progettazione logica}
 \section{Stima del volume dei dati}
+Parlando con il committente.
+%
+La capacità del carcere è di 350 persone, di cui all'incirca 50 rientrano ogni tre anni.
+%
+Vi sono la sezione A e B con cinque piani e 35 celle ciascuna.
+%
+Inoltre, vi è anche la sezione C composta da due piani: il primo piano 10 celle mediche, il secondo 10 celle solitarie.
+%
+
+
 \begin{table}[H]
 \begin{tabular}{lll}
 \hline
 Concetto & Costrutto & Volume \\ \hline
 DETENUTO & E & 500 \\
-trasf\_detenuto & A & 1500 \\
-TRASFERIMENTO & E &  1500 \\
+assegnazione\_letto & A &  \\
+TRASFERIMENTO\_LETTO & E &  1000 \\
+trasf\_detenuto & A & 1000 \\
+assegnazione\_letto & A & 1000\\
+ISOLAMENTO & E & 200\\
+spostamento\_solitaria & A & 200\\
+isolamento\_detenuto & A & 200 \\
+RICOVERO & E & 350 \\
+spostamento\_medica & A & 350 \\
+ricovero\_detenuto & A & 350 \\
 registro\_detenuto & A & 700 \\
-REGISTRO & E & 700 \\
-trasf\_cella & A &  \\
+REGISTRO\_DETENZIONE & E & 700 \\
 CELLA & E &  \\
 MEDICA & E & \\
 LETTO & E & \\
 SOLITARIA & E & \\
-appartiene & A & \\
+cella\_piano & A & \\
+PIANO & E & \\
+piano\_blocco & A & \\
 BLOCCO & E & \\
-controllo & A & \\
+controllo\_piano & A & \\
+REGISTRO\_ORARI & E & \\
+controllo\_guardia & A & \\
 GUARDIA & E & \\
 AMMINISTRATORE & E & \\
 PERSONALE & E & \\
+orario\_controllo & A & \\
 ORARIO & E & \\
 orario\_turno & A & \\
 TURNO & E & \\
-MATTINA & E & \\
-POMERIGGIO & E & \\
-NOTTE & E &
 \end{tabular}
 \end{table}
 \section{Descrizione delle operazioni principali e stima della loro frequenza}
