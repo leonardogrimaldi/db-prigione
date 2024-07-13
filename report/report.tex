@@ -200,7 +200,7 @@ TURNO & E & 3 \\
 \hline
 Operazione & Frequenza & Tipo \\ \hline
 Inserimento nuovo detenuto & 2/giorno &  \\
-Cambio cella letto & 5/mese &  \\
+Scambio posto letto con un altro detenuto & 5/mese &  \\
 Ricovero & 5/mese & \\
 Isolamento & 3/mese & \\
 Inserimento nel registro di un vecchio detenuto & 1/mese & \\
@@ -216,15 +216,50 @@ Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitari
 \end{table}
 \section{Schemi di navigazione e tabelle degli accessi}
 \subsection{Inserire un nuovo detenuto}
+\begin{enumerate}
+    \item Verificare che il detenuto non esista
+    \item Inserirlo nel registro
+    \item Leggere le celle letto libere
+        \begin{description}
+            \item[Richiede:] Leggere gli ultimi \#capacità trasferimenti per ogni singola cella e verificare che il detenuto sia in prigione.
+        \end{description}
+    \item Inserirlo in una cella letto
+\end{enumerate}
 \begin{table}[H]
 \begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
 \hline
 Concetto & Costrutto & Accessi & Tipo \\ \hline
-DETENUTO & E & 1 & L \\
+DETENUTO & E & 500 & L \\
 DETENUTO & E & 1 & S \\
+TRASFERIMENTO\_LETTO
 REGISTRO\_DETENZIONE & E & 1 & S \\
 registro\_detenuto & A & 1 & S \\
-
+trasf\_detenuto & A & 1 & S \\
+TRASFERIMENTO\_LETTO & E & 1 & S \\
+assegnazione\_letto & A & 1 & S \\
+\end{tabular}
+\end{table}
+\subsection{Scambio posto letto con un altro detenuto}
+\begin{table}[H]
+\begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
+\hline
+Concetto & Costrutto & Accessi & Tipo \\ \hline
+DETENUTO & E & 2 & L \\
+REGISTRO\_DETENZIONE & E & 2 & L \\
+registro\_detenuto & A & 2 & L \\
+trasf\_detenuto & A & 2 & S \\
+TRASFERIMENTO\_LETTO & E & 2 & S \\
+assegnazione\_letto & A & 2 & S \\
+\end{tabular}
+\end{table}
+\subsection{Ricovero}
+\begin{table}[H]
+\begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
+\hline
+Concetto & Costrutto & Accessi & Tipo \\ \hline
+DETENUTO & E & 2 & L \\
+REGISTRO\_DETENZIONE & E & 2 & L \\
+registro\_detenuto & A & 2 & L \\
 \end{tabular}
 \end{table}
 \end{document}
