@@ -145,7 +145,7 @@ L'entità REGISTRO\_ORARIO consente di storicizzare gli orari di lavoro delle GU
 Le cardinalità delle associazioni riferite a questa entità sono state ideate in modo tale da consentire a più GUARDIE di pattugliare un piano e una GUARDIA avere un solo PIANO da controllare in un ORARIO.
 \section{Schema concettuale finale}
 %\includegraphics[angle=-90]{er_finale_prigione}
-\chapter{Progettazione logica}
+\chapter{Progettazione logica}ò
 \section{Stima del volume dei dati}
 Parlando con il committente.
 %
@@ -162,7 +162,7 @@ Inoltre, vi è anche la sezione C composta da due piani: il primo piano 10 celle
 \hline
 Concetto & Costrutto & Volume \\ \hline
 DETENUTO & E & 500 \\
-assegnazione\_letto & A &  \\
+assegnazione\_letto & A &  1000\\
 TRASFERIMENTO\_LETTO & E &  1000 \\
 trasf\_detenuto & A & 1000 \\
 assegnazione\_letto & A & 1000\\
@@ -174,24 +174,24 @@ spostamento\_medica & A & 350 \\
 ricovero\_detenuto & A & 350 \\
 registro\_detenuto & A & 700 \\
 REGISTRO\_DETENZIONE & E & 700 \\
-CELLA & E &  \\
-MEDICA & E & \\
-LETTO & E & \\
-SOLITARIA & E & \\
-cella\_piano & A & \\
-PIANO & E & \\
+CELLA & E & 370 \\
+MEDICA & E & 10\\
+LETTO & E & 350 \\
+SOLITARIA & E & 10 \\
+cella\_piano & A & 370 \\
+PIANO & E & 12 \\
 piano\_blocco & A & \\
-BLOCCO & E & \\
+BLOCCO & E & 3 \\
 controllo\_piano & A & \\
 REGISTRO\_ORARI & E & \\
 controllo\_guardia & A & \\
-GUARDIA & E & \\
-AMMINISTRATORE & E & \\
-PERSONALE & E & \\
+GUARDIA & E & 25 \\
+AMMINISTRATORE & E & 10 \\
+PERSONALE & E & 35 \\
 orario\_controllo & A & \\
-ORARIO & E & \\
-orario\_turno & A & \\
-TURNO & E & \\
+ORARIO & E & 21 \\
+orario\_turno & A & 21 \\
+TURNO & E & 3 \\
 \end{tabular}
 \end{table}
 \section{Descrizione delle operazioni principali e stima della loro frequenza}
@@ -201,18 +201,17 @@ TURNO & E & \\
 Operazione & Frequenza & Tipo \\ \hline
 Inserimento nuovo detenuto & 2/giorno &  \\
 Cambio cella letto & 5/mese &  \\
-Trasferimento in cella medica & 5/mese & \\
-Trasferimento in cella solitaria & 3/mese & \\
+Ricovero & 5/mese & \\
+Isolamento & 3/mese & \\
 Inserimento nel registro di un vecchio detenuto & 1/mese & \\
 Inserimento nuova guardia & 5/anno & \\
 Inserimento nuovo amministratore & 2/anno & \\
-Eliminazione guardia & 5/anno & \\
 Cambio orario guardia & 6/mese & \\
 Visualizzare la lista dei detenuti presenti & 50/giorno & \\
 Visualizzare i detenuti rientrati in prigione & 2/mese & \\
-Visualizzare l'andamento di nuovi detenuti & 60/giorno & \\
+Visualizzare l'andamento settimanale di nuovi detenuti & 60/giorno & \\
 Visualizzare la lista di tutti i blocchi & 60/giorno & \\
-Visualizzare i primi 5 detenuti che sono stati trasferiti in celle solitarie più volte & 2/mese &
+Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitarie più volte & 2/mese &
 \end{tabular}
 \end{table}
 \end{document}
