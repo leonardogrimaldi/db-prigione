@@ -28,9 +28,12 @@ export default function DetenutiPage() {
                             Ricovera
                         </button>
                     </Link>
+                    <button className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+                        Visualizza: Rientrati
+                    </button>
                 </div>
                 <DataTable></DataTable>
-            </div> 
+            </div>
         </div>
     );
   }
