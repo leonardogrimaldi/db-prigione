@@ -10,7 +10,7 @@ export default function Layout({
       <div>
         <NavBar></NavBar>
       </div>
-      <div>
+      <div className="w-10/12">
         {children}
       </div>
     </div>

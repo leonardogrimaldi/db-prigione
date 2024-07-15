@@ -1,20 +1,23 @@
+import data from "./data.json"
+
 export default function DataTable() {
+    const entries = JSON.parse(JSON.stringify(data))
     return (
-        <table className="table-auto w-full">
+        <table className="table-auto w-full bg-white">
             <thead>
-                <tr>
-                    <th>Song</th>
-                    <th>Artist</th>
-                    <th>Year</th>
-                </tr>
+                {Object.keys(entries).map(e => {return <th key={e}>{e}</th>})}
             </thead>
             <tbody>
-                <tr>
-                    <td>The Sliding Mr. Bones (Next Stop, Pottersville)</td>
-                    <td>Malcolm Lockyer</td>
-                    <td>1961</td>
+                
+                <tr id="01" className="hover:bg-blue-300">
+                    <td>Mario</td>
+                    <td>Rossi</td>
+                    <td>1961-01-02</td>
+                    <td>1962-02-03</td>
+                    <td>A3-2</td>
+                    <td>No</td>
                 </tr>
-                <tr>
+                <tr id="02">
                     <td>Witchy Woman</td>
                     <td>The Eagles</td>
                     <td>1972</td>

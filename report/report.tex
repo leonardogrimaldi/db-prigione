@@ -149,11 +149,11 @@ Le cardinalità delle associazioni riferite a questa entità sono state ideate i
 \section{Stima del volume dei dati}
 Parlando con il committente.
 %
-La capacità del carcere è di 350 persone, di cui all'incirca 50 rientrano ogni tre anni.
+La capacità del carcere è di 400 persone, di cui all'incirca 50 rientrano ogni tre anni.
 %
-Vi sono la sezione A e B con cinque piani e 35 celle ciascuna.
+Vi sono la sezione A e B con due piani e 50 celle ciascuna, abilitate a ospitare massimo due persone.
 %
-Inoltre, vi è anche la sezione C composta da due piani: il primo piano 10 celle mediche, il secondo 10 celle solitarie.
+Inoltre, vi è anche la sezione C composta anch'essa da due piani: il primo piano 10 celle mediche, il secondo 10 celle solitarie.
 %
 
 
@@ -162,7 +162,7 @@ Inoltre, vi è anche la sezione C composta da due piani: il primo piano 10 celle
 \hline
 Concetto & Costrutto & Volume \\ \hline
 DETENUTO & E & 500 \\
-assegnazione\_letto & A &  1000\\
+assegnazione\_letto & A &  1000 \\
 TRASFERIMENTO\_LETTO & E &  1000 \\
 trasf\_detenuto & A & 1000 \\
 assegnazione\_letto & A & 1000\\
@@ -174,13 +174,13 @@ spostamento\_medica & A & 350 \\
 ricovero\_detenuto & A & 350 \\
 registro\_detenuto & A & 700 \\
 REGISTRO\_DETENZIONE & E & 700 \\
-CELLA & E & 370 \\
+CELLA & E & 220 \\
 MEDICA & E & 10\\
-LETTO & E & 350 \\
+LETTO & E & 200 \\
 SOLITARIA & E & 10 \\
-cella\_piano & A & 370 \\
-PIANO & E & 12 \\
-piano\_blocco & A & \\
+cella\_piano & A & 220 \\
+PIANO & E & 6 \\
+piano\_blocco & A & 6 \\
 BLOCCO & E & 3 \\
 controllo\_piano & A & \\
 REGISTRO\_ORARI & E & \\
@@ -215,13 +215,14 @@ Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitari
 \end{tabular}
 \end{table}
 \section{Schemi di navigazione e tabelle degli accessi}
+Le scritture costano il doppio.
 \subsection{Inserire un nuovo detenuto}
 \begin{enumerate}
     \item Verificare che il detenuto non esista
     \item Inserirlo nel registro
     \item Leggere le celle letto libere
         \begin{description}
-            \item[Richiede:] Leggere gli ultimi \#capacità trasferimenti per ogni singola cella e verificare che il detenuto sia in prigione.
+            \item[Richiede:] Leggere gli ultimi \#num\_letti trasferimenti per ogni singola cella e verificare che il detenuto sia in prigione.
         \end{description}
     \item Inserirlo in una cella letto
 \end{enumerate}
@@ -229,16 +230,15 @@ Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitari
 \begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
 \hline
 Concetto & Costrutto & Accessi & Tipo \\ \hline
-DETENUTO & E & 500 & L \\
 DETENUTO & E & 1 & S \\
-TRASFERIMENTO\_LETTO
-REGISTRO\_DETENZIONE & E & 1 & S \\
 registro\_detenuto & A & 1 & S \\
+REGISTRO\_DETENZIONE & E & 1 & S \\
 trasf\_detenuto & A & 1 & S \\
 TRASFERIMENTO\_LETTO & E & 1 & S \\
 assegnazione\_letto & A & 1 & S \\
 \end{tabular}
 \end{table}
+Costo totale: \(6S * 2 * 2/g= 24\)
 \subsection{Scambio posto letto con un altro detenuto}
 \begin{table}[H]
 \begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
