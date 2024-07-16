@@ -4,7 +4,7 @@ import DataTable from "./DataTable";
 
 export default function DetenutiPage() {
     return (
-        <div className="flex flex-col mt-10 w-full">
+        <div className="flex flex-col w-full">
             <div className="mr-10">
                 <div className="flex flex-row gap-x-2">
                     <button className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">

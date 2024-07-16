@@ -1,0 +1,22 @@
+{
+    "01": {
+      "nome": "Marco",
+      "cognome": "Rossi",
+      "inizio_detenzione": "2023-01-02",
+      "fine_detenzione": "2024-05-03",
+      "id_blocco": "A",
+      "id_piano": 2,
+      "id_cella": 3,
+      "deceduto": 0
+    },
+    "02": {
+      "nome": "Marco",
+      "cognome": "Grimaldi",
+      "inizio_detenzione": "2023-01-02",
+      "fine_detenzione": "2024-05-03",
+      "id_blocco": "A",
+      "id_piano": 2,
+      "id_cella": 3,
+      "deceduto": 0
+    }
+  }
