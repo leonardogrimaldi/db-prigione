@@ -262,4 +262,22 @@ REGISTRO\_DETENZIONE & E & 2 & L \\
 registro\_detenuto & A & 2 & L \\
 \end{tabular}
 \end{table}
+\section{Raffinamento dello schema}
+\subsection{Specializzazione Amministratore e Guardia}
+Per mappare la specializzazione si è deciso di creare una relazione per ogni sottoclasse (in questo caso due) e inserire gli attributi nelle corrispondenti, nonché una chiave esterna che si riferisca alla chiave primaria badge della relazione PERSONALE. 
+\subsection{Specializzazione Letto, Medica e Solitaria}
+Le tre specializzazioni che conferiscono nell'entità LETTO sono totali ed esclusive.
+%
+Si possono quindi eliminare e creare una unica relazione LETTO che avrà tutti gli attributi delle sottoclassi eliminate: in questo caso solo num\_letti.
+%
+Viene inoltre aggiunto l'attributo "tipo" che potrà avere come valori: "Solitaria", "Letto", "Medica" per poter differenziare le singole celle.
+%
+Sarebbe stato anche possibile eliminare l'entità CELLA e creare tre relazioni, ma così facendo bisognava creare altre tre nuove relazioni da collegare con l'entità PIANO il che avrebbe complicato di molto le query SQL.
+%
+Facendo in questo modo si ha una unico collegamento con l'entità PIANO, con l'unico svantaggio quello di dover esprimere a livello applicativo vincoli sul tipo e num\_letti (per la solitaria deve essere = 1).
+\subsection{Scelta delle chiavi primarie}
+Le chiavi di ogni entità sono già state scelte ed evidenziate nello schema E/R.
+%
+Per la chiave primaria "badge" di PERSONALE si è fatto riferimento all'intervista del committente nel quale ha espressamente indicato che il personale è in possesso di un codice univoco.
+
 \end{document}
