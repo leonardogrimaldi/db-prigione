@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt]{report}
 \usepackage{alltt, fancyvrb, url}
 \usepackage{graphicx}
+\usepackage[export]{adjustbox}
 \usepackage[utf8]{inputenc}
 \usepackage{float}
 \usepackage{hyperref}
@@ -165,7 +166,7 @@ DETENUTO & E & 500 \\
 assegnazione\_letto & A &  1000 \\
 TRASFERIMENTO\_LETTO & E &  1000 \\
 trasf\_detenuto & A & 1000 \\
-assegnazione\_letto & A & 1000\\
+assegnazione\_letto & A & 1000 \\
 ISOLAMENTO & E & 200\\
 spostamento\_solitaria & A & 200\\
 isolamento\_detenuto & A & 200 \\
@@ -210,7 +211,6 @@ Cambio orario guardia & 6/mese & \\
 Visualizzare la lista dei detenuti presenti & 50/giorno & \\
 Visualizzare i detenuti rientrati in prigione & 2/mese & \\
 Visualizzare l'andamento settimanale di nuovi detenuti & 60/giorno & \\
-Visualizzare la lista di tutti i blocchi & 60/giorno & \\
 Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitarie più volte & 2/mese &
 \end{tabular}
 \end{table}
@@ -230,23 +230,42 @@ Le scritture costano il doppio.
 \begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
 \hline
 Concetto & Costrutto & Accessi & Tipo \\ \hline
+DETENUTO & E & 500 & L \\
 DETENUTO & E & 1 & S \\
 registro\_detenuto & A & 1 & S \\
 REGISTRO\_DETENZIONE & E & 1 & S \\
+TRASFERIMENTO\_LETTO & E & \(200 * 2 = 400\) & L \\
+trasf\_detenuto & A & 400 & L \\
+REGISTRO\_DETENZIONE & E & 400 & L \\
+registro\_detenuto & A & 400 & L \\
+DETENUTO & E & 400 & L \\
 trasf\_detenuto & A & 1 & S \\
 TRASFERIMENTO\_LETTO & E & 1 & S \\
 assegnazione\_letto & A & 1 & S \\
 \end{tabular}
 \end{table}
+200 * 2 = 400 Perché 200 sono le celle letto e 2 sono i posti letto
+%
+
 Costo totale: \(6S * 2 * 2/g= 24\)
+\newline
+\includegraphics[max size={\textwidth}{\textheight}]{op_1_inserire_nuovo_detenuto}
 \subsection{Scambio posto letto con un altro detenuto}
+\begin{itemize}
+    \item Ho l'id di due detenuti 
+    \item Leggo il loro ultimo trasferimento letto
+    \item 
+\end{itemize}
 \begin{table}[H]
 \begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
 \hline
 Concetto & Costrutto & Accessi & Tipo \\ \hline
 DETENUTO & E & 2 & L \\
-REGISTRO\_DETENZIONE & E & 2 & L \\
 registro\_detenuto & A & 2 & L \\
+REGISTRO\_DETENZIONE & E & 2 & L \\
+trasf\_detenuto & A & 2 & L \\
+TRASFERIMENTO\_LETTO & E & 2 & L \\
+assegnazione\_letto & A & 2 & L \\
 trasf\_detenuto & A & 2 & S \\
 TRASFERIMENTO\_LETTO & E & 2 & S \\
 assegnazione\_letto & A & 2 & S \\
@@ -254,12 +273,20 @@ assegnazione\_letto & A & 2 & S \\
 \end{table}
 \subsection{Ricovero}
 \begin{table}[H]
-\begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
+\begin{tabular}{p{5cm} p{2cm} p{3cm} p{1cm}}
 \hline
 Concetto & Costrutto & Accessi & Tipo \\ \hline
-DETENUTO & E & 2 & L \\
-REGISTRO\_DETENZIONE & E & 2 & L \\
-registro\_detenuto & A & 2 & L \\
+DETENUTO & E & 1 & L \\
+registro\_detenuto & A & \(700 / 500 = 1.4 \) & L \\
+REGISTRO\_DETENZIONE & E & 1 & L \\
+ricovero\_detenuto & A & \(350 / 700 = 0.5\) & L \\
+RICOVERO & E & 0.5 & L \\
+MEDICA & E & 10 & L \\
+spostamento\_medica & A & 10 & L \\
+RICOVERO & E & 10 & L \\
+ricovero\_detenuto & A & 1 & S \\
+RICOVERO & E & 1 & S \\
+spostamento\_medica & A & 1 & S \\
 \end{tabular}
 \end{table}
 \section{Raffinamento dello schema}
@@ -279,5 +306,8 @@ Facendo in questo modo si ha una unico collegamento con l'entità PIANO, con l'u
 Le chiavi di ogni entità sono già state scelte ed evidenziate nello schema E/R.
 %
 Per la chiave primaria "badge" di PERSONALE si è fatto riferimento all'intervista del committente nel quale ha espressamente indicato che il personale è in possesso di un codice univoco.
-
+\section{Analisi delle ridondanze}
+Data la complessità e il costo delle operazioni di inserimento di un detenuto nonché l'assegnazione di una cella, si è deciso di inserire l'attributo ridondante "occupazione" che verrà incrementato e decrementato quando un detenuto rispettivamente entra o lascia una cella.
+%
+Ovviamente, questo numero non dovrà mai superare il limite massimo dato da num\_letti, quindi si dovrà gestire questo vincolo a livello applicativo.
 \end{document}
