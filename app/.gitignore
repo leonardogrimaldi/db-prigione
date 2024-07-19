@@ -37,4 +37,4 @@ next-env.d.ts
 
 .vercel
 
-./utils/postgres.tsx
+/utils/postgres.tsx
