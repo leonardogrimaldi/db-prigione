@@ -215,8 +215,10 @@ Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitari
 \end{tabular}
 \end{table}
 \section{Schemi di navigazione e tabelle degli accessi}
+In questa parte si elencano le tabelle degli accessi per le operazioni principali e più complesse.
+%
 Le scritture costano il doppio.
-\subsection{Inserire un nuovo detenuto}
+\subsection{Inserire un nuovo detenuto} \label{inserimento}
 \begin{enumerate}
     \item Verificare che il detenuto non esista
     \item Inserirlo nel registro
@@ -244,7 +246,7 @@ TRASFERIMENTO\_LETTO & E & 1 & S \\
 assegnazione\_letto & A & 1 & S \\
 \end{tabular}
 \end{table}
-200 * 2 = 400 Perché 200 sono le celle letto e 2 sono i posti letto
+Nota: 200 * 2 = 400 Perché 200 sono le celle letto e 2 sono i posti letto
 %
 
 Costo totale: \(6S * 2 * 2/g= 24\)
@@ -307,7 +309,25 @@ Le chiavi di ogni entità sono già state scelte ed evidenziate nello schema E/R
 %
 Per la chiave primaria "badge" di PERSONALE si è fatto riferimento all'intervista del committente nel quale ha espressamente indicato che il personale è in possesso di un codice univoco.
 \section{Analisi delle ridondanze}
-Data la complessità e il costo delle operazioni di inserimento di un detenuto nonché l'assegnazione di una cella, si è deciso di inserire l'attributo ridondante "occupazione" che verrà incrementato e decrementato quando un detenuto rispettivamente entra o lascia una cella.
+Data la complessità e il costo delle operazioni di inserimento di un detenuto nonché l'assegnazione di una cella, si è deciso di inserire l'attributo ridondante "posti\_occupati" che verrà incrementato e decrementato quando un detenuto rispettivamente entra o lascia una cella.
 %
 Ovviamente, questo numero non dovrà mai superare il limite massimo dato da num\_letti, quindi si dovrà gestire questo vincolo a livello applicativo.
+%
+Dopo l'aggiunta dell'attributo ridondante, la tabella della sezione\ref{inserimento}~\nameref{inserimento} diventerà: 
+\begin{table}[H]
+\begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
+\hline
+Concetto & Costrutto & Accessi & Tipo \\ \hline
+DETENUTO & E & 500 & L \\
+LETTO & E & 200 & L \\
+DETENUTO & E & 1 & S \\
+registro\_detenuto & A & 1 & S \\
+REGISTRO\_DETENZIONE & E & 1 & S \\
+trasf\_detenuto & A & 1 & S \\
+TRASFERIMENTO\_LETTO & 1 & S \\
+assegnazione\_letto & 1 & S \\
+LETTO & 1 & S \\
+\end{tabular}
+\end{table}
+Come si può notare, si aggiunge una scrittura a LETTO per aggiornare l'attributo "occupazione".
 \end{document}
