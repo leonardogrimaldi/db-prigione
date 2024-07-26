@@ -1,19 +1,23 @@
 'use server'
-import { NuovoDetenutoFormState } from "@/app/dashboard/detenuti/nuovo/page"
 import pool from "../../utils/postgres"
+import { DetenutoSchema } from "../../lib/types";
 
-export async function nuovoDetenuto(formData: NuovoDetenutoFormState) {
 
+
+export async function nuovoDetenuto(state: any, formData: unknown) {
     const text =
         `
     INSERT INTO detenuto (nome, cognome, data_di_nascita, carta_di_identita, altezza)
     VALUES ($1, $2, $3, $4, $5)
     `
     try {
-        const res = await pool.query(text, Object.values(formData))
-        return {message: "Il detenuto è stato aggiunto"}
-    } catch {
-        return {message: "Non è stato possibile eseguire l'operazione"}
+        const data = DetenutoSchema.parse(formData)
+        console.log(data)
+        //const res = await pool.query(text, Object.values(data))
+        return {message: "Il detenuto è stato aggiunto"}    
+    } catch (e){
+        console.log(e)
+        return {error: "Non è stato possibile eseguire l'operazione"}
     }
 }
 

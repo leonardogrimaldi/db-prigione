@@ -1,8 +1,8 @@
 'use client'
-import { FormEvent, useEffect, useState } from "react"
 import SelectCelle from "./SelectCelle"
 import { nuovoDetenuto } from "@/actions/action"
-
+import { useFormState } from "react-dom"
+import { Detenuto, DetenutoSchema, RegistroSchema } from "../../../../../lib/types"
 function getDate() {
     let todayDate = new Date()
     const offset = todayDate.getTimezoneOffset()
@@ -10,34 +10,23 @@ function getDate() {
     return todayDate.toISOString().split('T')[0]
 }
 
-export interface NuovoDetenutoFormState {
-    nome: string,
-    cognome: string,
-    data_di_nascita: string,
-    carta_di_identita: string,
-    altezza: string,
-    inizio_detenzione: string,
-    fine_detenzione: string
-}
-
 export default function NuovoDetenuto() {
-    const [formData, setFormData] = useState<NuovoDetenutoFormState>();
-    async function creaDetenuto(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        try {
-            if (formData != undefined) {
-                const response = await nuovoDetenuto(formData);
-            } else {
-                throw new TypeError("The submitted form has no data in it.")
-            }
-        } catch (e) {
-            
-        }
-    }
+    const [message, formAction] = useFormState(nuovoDetenuto, null);
 
+    function clientAction(formData: FormData) {
+        const registro = RegistroSchema.parse([
+            formData.get('carta_di_identita'),
+            formData.get('inizio_detenzione'),
+            formData.get('fine_detenzione')
+        ]);
+        formData.delete('inizio_detenzione')
+        formData.delete('fine_detenzione')
+        const detenuto = DetenutoSchema.parse(formData)
+        formAction([registro, detenuto])
+    }
     return (
         <div>
-            <form onSubmit={creaDetenuto} className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
+            <form action={clientAction} className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
                 <div className="flex flex-col">
                     <div className="p-3 flex flex-row gap-x-5"> 
                         <div className="flex flex-col w-full ">
@@ -82,7 +71,8 @@ export default function NuovoDetenuto() {
                     </div>
                 </div>
             </form>
-            <p aria-live="polite" className="sr-only">
+            <p>
+                {JSON.stringify(message, null, 2)}
             </p>
         </div>
 
