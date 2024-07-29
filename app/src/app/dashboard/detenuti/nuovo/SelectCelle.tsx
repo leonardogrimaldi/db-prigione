@@ -1,15 +1,7 @@
 "use client"
 import { Fragment, useEffect, useState } from "react"
-import { Cella, getCells } from "@/actions/action"
-
-
-
-function OptionCella(c: Cella) {
-    const value = c.id_blocco + c.id_piano + "-" + c.id_cella
-    return (
-        <option value={value}>{value}</option>
-    )
-}
+import {getCells } from "@/actions/action"
+import { Cella } from "../../../../../lib/types"
 
 export default function SelectCelle() {
     const [celle, setCelle] = useState<Cella[]>();

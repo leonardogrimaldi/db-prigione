@@ -2,7 +2,6 @@
 import SelectCelle from "./SelectCelle"
 import { nuovoDetenuto } from "@/actions/action"
 import { useFormState } from "react-dom"
-import { Detenuto, DetenutoSchema, RegistroSchema } from "../../../../../lib/types"
 function getDate() {
     let todayDate = new Date()
     const offset = todayDate.getTimezoneOffset()
@@ -12,21 +11,10 @@ function getDate() {
 
 export default function NuovoDetenuto() {
     const [message, formAction] = useFormState(nuovoDetenuto, null);
-
-    function clientAction(formData: FormData) {
-        const registro = RegistroSchema.parse([
-            formData.get('carta_di_identita'),
-            formData.get('inizio_detenzione'),
-            formData.get('fine_detenzione')
-        ]);
-        formData.delete('inizio_detenzione')
-        formData.delete('fine_detenzione')
-        const detenuto = DetenutoSchema.parse(formData)
-        formAction([registro, detenuto])
-    }
+    
     return (
         <div>
-            <form action={clientAction} className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
+            <form action={formAction} className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
                 <div className="flex flex-col">
                     <div className="p-3 flex flex-row gap-x-5"> 
                         <div className="flex flex-col w-full ">
