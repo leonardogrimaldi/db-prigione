@@ -2,26 +2,39 @@
 import pool from "../../utils/postgres"
 import { Cella, CellaSchema, Detenuto, DetenutoSchema, Registro, RegistroSchema, Trasferimento_Letto, Trasferimento_Letto_Schema } from "../../lib/types";
 
-
+async function aggiornaPostiOccupati(c: Cella) {
+    throw new Error("Query non verificate")
+    const postiOccupati =
+    `
+    SELECT COUNT(*)
+    FROM trasferimento_letto
+    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita IS NULL
+    `
+    const aggiornaPosti = 
+    `
+    UPDATE cella
+    SET posti_occupati = $1
+    WHERE id_blocco = $2 AND id_piano = $3 AND id_cella = $4
+    `
+    const res = await pool.query(postiOccupati, Object.values(c))
+    await pool.query(aggiornaPosti, [res.rows[0], c.id_blocco, c.id_piano, c.id_cella])
+}
 
 export async function nuovoDetenuto(state: any, formData: FormData) {
     const insertDetenuto =
-        `
+    `
     INSERT INTO detenuto (nome, cognome, data_di_nascita, carta_di_identita, altezza)
     VALUES ($1, $2, $3, $4, $5)
     `
-    const insertRegistro =  `
+    const insertRegistro =
+    `
     INSERT INTO registro_detenzione (carta_di_identita, inizio_detenzione, fine_detenzione)
     VALUES ($1, $2, $3)
     `
-    const insertTrasferimento = `
+    const insertTrasferimento = 
+    `
     INSERT INTO trasferimento_letto (data_entrata, id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita)
     VALUES ($1, $2, $3, $4, $5, $6)
-    ` 
-    const ultimoTrasferimento = `
-    SELECT *
-    FROM trasferimento_letto
-    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita > $1  
     `
     try {
         const detenuto: Detenuto = DetenutoSchema.parse({
@@ -54,16 +67,13 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
         const trasferimento: Trasferimento_Letto = Trasferimento_Letto_Schema.parse({
             data_entrata: registro.inizio_detenzione
         })
-        const res = await pool.query(ultimoTrasferimento, [cella.id_blocco, cella.id_piano, cella.id_cella, registro.inizio_detenzione])
-        if (res.rows.length != 0) {
-            throw new Error("Non si può immettere una data di inizio_detenzione/data_entrata < data_uscita dell'ultimo trasferimento in quella cella")
-        }
         await pool.query('BEGIN')
         await pool.query(insertDetenuto, Object.values(detenuto))
         await pool.query(insertRegistro, Object.values(registro))
         const values = [trasferimento.data_entrata, Object.values(cella), registro.inizio_detenzione, registro.carta_di_identita].flat()
         console.log(values)
         await pool.query(insertTrasferimento, values)
+        aggiornaPostiOccupati(cella)
         await pool.query('COMMIT')
         return {message: "Il detenuto è stato aggiunto"}    
     } catch (e){
