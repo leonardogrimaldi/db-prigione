@@ -18,7 +18,11 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
     INSERT INTO trasferimento_letto (data_entrata, id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita)
     VALUES ($1, $2, $3, $4, $5, $6)
     ` 
-    throw new Error("Non è stato implementato il controllo sulla data di entrata che deve essere quella dopo l'ultimo trasferimento se c'è")
+    const ultimoTrasferimento = `
+    SELECT *
+    FROM trasferimento_letto
+    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita > $1  
+    `
     try {
         const detenuto: Detenuto = DetenutoSchema.parse({
             nome: formData.get('nome'),
@@ -32,14 +36,28 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
             inizio_detenzione: formData.get('inizio_detenzione'),
             fine_detenzione: formData.get('fine_detenzione')
         })
+        /**
+         * Faccio il parse della stringa cella che l'utente invia, che sarà di tipo "A,3,1"
+         *  A: id_blocco
+         *  3: id_piano
+         *  1: id_cella
+         */
+        const parsedCellaCSV = formData.get('cella')?.toString().split(',')
+        if (parsedCellaCSV == undefined || parsedCellaCSV.length !== 3) {
+            throw new TypeError("Il valore della cella non è corretto")
+        }
         const cella: Cella = CellaSchema.parse({
-            id_blocco: 'A',
-            id_piano: '1',
-            id_cella: '1'
+            id_blocco: parsedCellaCSV[0],
+            id_piano: parsedCellaCSV[1],
+            id_cella: parsedCellaCSV[2]
         })
         const trasferimento: Trasferimento_Letto = Trasferimento_Letto_Schema.parse({
             data_entrata: registro.inizio_detenzione
         })
+        const res = await pool.query(ultimoTrasferimento, [cella.id_blocco, cella.id_piano, cella.id_cella, registro.inizio_detenzione])
+        if (res.rows.length != 0) {
+            throw new Error("Non si può immettere una data di inizio_detenzione/data_entrata < data_uscita dell'ultimo trasferimento in quella cella")
+        }
         await pool.query('BEGIN')
         await pool.query(insertDetenuto, Object.values(detenuto))
         await pool.query(insertRegistro, Object.values(registro))
