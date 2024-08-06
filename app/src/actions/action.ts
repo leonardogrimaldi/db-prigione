@@ -110,9 +110,8 @@ export interface DetenutoPresente {
     Deceduto: boolean
 }
 export async function getDetenutiPresenti() {
-    console.log("XD")
     const client = await pool.connect()
-    const res = await client.query<DetenutoPresente>(
+    const res = await client.query<Map<string, string>>(
         `
         SELECT d.carta_di_identita AS "CDI", d.nome AS "Nome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella", d.deceduto AS "Deceduto"
         FROM registro_detenzione r 
