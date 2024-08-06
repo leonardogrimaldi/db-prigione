@@ -1,8 +1,25 @@
 'use client'
 import Link from "next/link";
 import DataTable from "./DataTable";
+import { DetenutoPresente, getDetenutiPresenti } from "@/actions/action";
+import { useEffect, useState } from "react";
 
 export default function DetenutiPage() {
+    const [data, setData] = useState<DetenutoPresente[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const result = await getDetenutiPresenti();
+                console.log(result)
+                setData(result)
+            } catch (e) {
+                console.log(e)
+                throw new Error("Failed to fetch data")
+            }
+        };
+        fetchData();
+    }, []);
     return (
         <div className="flex flex-col w-full">
             <div className="mr-10">
@@ -34,7 +51,7 @@ export default function DetenutiPage() {
                         Visualizza: Rientrati
                     </button>
                 </div>
-                <DataTable></DataTable>
+                <DataTable data={data}></DataTable>
             </div>
         </div>
     );

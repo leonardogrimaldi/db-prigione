@@ -1,21 +1,16 @@
-import data from "./data.json"
+import { DetenutoPresente } from "@/actions/action";
+import { useEffect, useState } from "react";
 
-type Detenuto = {
-    id: string,
-    nome: string,
-    cognome: string,
-    inizio: string,
-    fine: string,
-    cella: string,
-    deceduto: boolean
+interface DataTableProps {
+    data: object
 }
-export default function DataTable() {
-    const colnames: string[] = ["id", "Nome", "Cognome", "Inizio", "Fine", "Cella", "Deceduto"]
+
+export default function DataTable<DataType>(data: DataType[]) {
     return (
         <table className="table-auto w-full bg-white">
             <thead>
                 <tr>
-                    {colnames.map(e => {if (e != "id") return <th key={e}>{e}</th>})}
+                    
                 </tr>
             </thead>
             <tbody>

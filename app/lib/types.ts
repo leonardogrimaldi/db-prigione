@@ -22,8 +22,6 @@ export const Trasferimento_Letto_Schema = z.object({
     data_uscita: z.string().trim().optional(),
 })
 
-
-
 export type Detenuto = z.infer<typeof DetenutoSchema>
 export type Registro = z.infer<typeof RegistroSchema>
 export type Cella = z.infer<typeof CellaSchema>
