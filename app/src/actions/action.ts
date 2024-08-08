@@ -1,9 +1,9 @@
 'use server'
-import pool from "../../utils/postgres"
+import client from "../../utils/postgres"
 import { Cella, CellaSchema, Detenuto, DetenutoSchema, Registro, RegistroSchema, Trasferimento_Letto, Trasferimento_Letto_Schema } from "../../lib/types";
 import z from "zod";
-import { PoolClient } from "pg";
-async function aggiornaPostiOccupati(c: Cella, client: PoolClient) {
+import { Client} from "pg";
+async function aggiornaPostiOccupati(c: Cella, client: Client) {
     const postiOccupati =
     `
     SELECT COUNT(data_entrata) as occupanti
@@ -25,7 +25,7 @@ async function aggiornaPostiOccupati(c: Cella, client: PoolClient) {
 }
 
 export async function nuovoDetenuto(state: any, formData: FormData) {
-    const client = await pool.connect()
+    await client.connect()
     const insertDetenuto =
         `
     INSERT INTO detenuto (nome, cognome, data_di_nascita, carta_di_identita, altezza)
@@ -85,11 +85,13 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
         await client.query('ROLLBACK')
         console.log(e)
         return { error: e }
+    } finally {
+        await client.end()
     }
 }
 
 export async function getCells() {
-    const client = await pool.connect()
+    await client.connect()
     const res = await client.query<Cella>(
         `
         SELECT cella.id_cella, cella.id_piano, cella.id_blocco 
@@ -97,24 +99,25 @@ export async function getCells() {
         WHERE posti_occupati < num_letti AND tipo = 'letto'
         `
     )
-
+    client.end()
     return res.rows
 }
 
 export interface DetenutoPresente {
     CDI: string,
     Nome: string,
-    Inizio: string,
-    Fine: string,
+    Inizio: Date,
+    Fine: Date,
     Cella: string,
     Deceduto: boolean
 }
+
 export async function getDetenutiPresenti() {
-    const client = await pool.connect()
-    const res = await client.query<Map<string, string>>(
+    await client.connect()
+    const res = await client.query<DetenutoPresente>(
         `
         SELECT d.carta_di_identita AS "CDI", d.nome AS "Nome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella", d.deceduto AS "Deceduto"
-        FROM registro_detenzione r 
+        FROM registro_detenzione r
         JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
         JOIN trasferimento_letto t ON r.inizio_detenzione = t.inizio_detenzione AND r.carta_di_identita = t.carta_di_identita
         WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione
@@ -122,5 +125,7 @@ export async function getDetenutiPresenti() {
         LIMIT 1
         `
     )
+    console.log(res.rows)
+    await client.end()
     return res.rows
 }

@@ -1,4 +1,4 @@
-import pool from "./postgres"
+import client from "./postgres"
 
 export default async function Test() {
     const piani = [1,2]
@@ -7,7 +7,7 @@ export default async function Test() {
     for (let index = 0; index < 2; index++) {
         for (let i = 1; i <= 10; i++) {
             let values = [piani[index], sezioni[0], i, 'letto']
-            const res = await pool.query(text, values)
+            const res = await client.query(text, values)
             console.log(res.rows[0])
         }   
     }

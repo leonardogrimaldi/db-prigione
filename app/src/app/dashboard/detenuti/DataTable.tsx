@@ -1,5 +1,6 @@
 import { DetenutoPresente } from "@/actions/action";
 import { useEffect, useState } from "react";
+import { string } from "zod";
 
 interface DataTableProps {
     data: Map<string,string>[]
@@ -14,7 +15,7 @@ export default function DataTable(props: DataTableProps) {
                 </tr>
             </thead>
             <tbody>
-                
+                {props.data.map(m => {return <Entry data={m}/>})}
             </tbody>
         </table>
     )
@@ -24,9 +25,12 @@ interface EntryProp {
     data: Map<string,string>
 }
 function Entry(prop: EntryProp) {
+    console.log(prop)
     return (
         <tr>
-            {Object.keys(prop.data).map(v => {return <td>{v}</td>})}
+            {Object.values(prop.data).map(v => {
+                return <td>{v}</td>
+                })}
         </tr>
     )
 } 

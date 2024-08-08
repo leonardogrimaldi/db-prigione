@@ -1,4 +1,4 @@
-import pool from "../../../utils/postgres";
+import client from "../../../utils/postgres";
 export default async function HomePage() {
     
     return (

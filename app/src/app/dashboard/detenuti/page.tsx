@@ -5,12 +5,13 @@ import { DetenutoPresente, getDetenutiPresenti } from "@/actions/action";
 import { useEffect, useState } from "react";
 
 export default function DetenutiPage() {
-    const [data, setData] = useState<Map<string,string>[]>([new Map<string,string>()]);
+    const [data, setData] = useState<Array<DetenutoPresente>>();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const result = await getDetenutiPresenti();
+                console.log(result)
                 setData(result)
             } catch (e) {
                 console.log(e)
@@ -50,7 +51,7 @@ export default function DetenutiPage() {
                         Visualizza: Rientrati
                     </button>
                 </div>
-                <DataTable data={data}></DataTable>
+                
             </div>
         </div>
     );
