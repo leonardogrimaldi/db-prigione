@@ -1,8 +1,7 @@
 'use server'
-import client from "../../utils/postgres"
 import { Cella, CellaSchema, Detenuto, DetenutoSchema, Registro, RegistroSchema, Trasferimento_Letto, Trasferimento_Letto_Schema } from "../../lib/types";
 import z from "zod";
-import { Client} from "pg";
+import { Client, QueryResult, types} from "pg";
 async function aggiornaPostiOccupati(c: Cella, client: Client) {
     const postiOccupati =
     `
@@ -25,6 +24,7 @@ async function aggiornaPostiOccupati(c: Cella, client: Client) {
 }
 
 export async function nuovoDetenuto(state: any, formData: FormData) {
+    const client = await new Client()
     await client.connect()
     const insertDetenuto =
         `
@@ -91,6 +91,7 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
 }
 
 export async function getCells() {
+    const client = await new Client()
     await client.connect()
     const res = await client.query<Cella>(
         `
@@ -103,28 +104,44 @@ export async function getCells() {
     return res.rows
 }
 
-export interface DetenutoPresente {
-    CDI: string,
-    Nome: string,
-    Inizio: Date,
-    Fine: Date,
-    Cella: string,
-    Deceduto: boolean
+export async function getDetenutiPresenti(): Promise<any[]> {
+    const types = require('pg').types
+    types.setTypeParser(1082, (val: string) => new Date(val).toISOString().split('T')[0]);
+    const client = await new Client()
+    await client.connect()
+    const query = 
+    `
+    SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) as "Cognome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella", d.deceduto AS "Deceduto"
+    FROM registro_detenzione r
+    JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
+    JOIN trasferimento_letto t ON r.inizio_detenzione = t.inizio_detenzione AND r.carta_di_identita = t.carta_di_identita
+    WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione
+    ORDER BY t.data_entrata DESC
+    LIMIT 1
+    `
+    const res = await client.query(query)
+    console.log(res.rows)
+    await client.end()
+    return res.rows
 }
 
-export async function getDetenutiPresenti() {
+export async function getDetenutiRientrati(): Promise<any[]> {
+    throw Error('Todo query')
+    const types = require('pg').types
+    types.setTypeParser(1082, (val: string) => new Date(val).toISOString().split('T')[0]);
+    const client = await new Client()
     await client.connect()
-    const res = await client.query<DetenutoPresente>(
-        `
-        SELECT d.carta_di_identita AS "CDI", d.nome AS "Nome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella", d.deceduto AS "Deceduto"
-        FROM registro_detenzione r
-        JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
-        JOIN trasferimento_letto t ON r.inizio_detenzione = t.inizio_detenzione AND r.carta_di_identita = t.carta_di_identita
-        WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione
-        ORDER BY t.data_entrata DESC
-        LIMIT 1
-        `
-    )
+    const query = 
+    `
+    SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) as "Cognome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella", d.deceduto AS "Deceduto"
+    FROM registro_detenzione r
+    JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
+    JOIN trasferimento_letto t ON r.inizio_detenzione = t.inizio_detenzione AND r.carta_di_identita = t.carta_di_identita
+    WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione
+    ORDER BY t.data_entrata DESC
+    LIMIT 1
+    `
+    const res = await client.query(query)
     console.log(res.rows)
     await client.end()
     return res.rows

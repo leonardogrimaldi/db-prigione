@@ -1,9 +1,8 @@
-import { DetenutoPresente } from "@/actions/action";
-import { useEffect, useState } from "react";
-import { string } from "zod";
+import { QueryResult } from "pg";
+import { MouseEvent } from "react";
 
 interface DataTableProps {
-    data: Map<string,string>[]
+    data: any[]
 }
 
 export default function DataTable(props: DataTableProps) {
@@ -11,25 +10,32 @@ export default function DataTable(props: DataTableProps) {
         <table className="table-auto w-full bg-white">
             <thead>
                 <tr>
-                    {Object.keys(props.data[0]).map(k => {return <th>{k}</th>})}                    
+                    {Object.keys(props.data[0]).map(k => {return <th key={k}>{k}</th>})}                    
                 </tr>
             </thead>
             <tbody>
-                {props.data.map(m => {return <Entry data={m}/>})}
+                {props.data.map(m => {return <TableRow key={m} data={m}/>})}
             </tbody>
         </table>
     )
 }
 
 interface EntryProp {
-    data: Map<string,string>
+    data: Array<string>
 }
-function Entry(prop: EntryProp) {
-    console.log(prop)
+/**
+ * Assumes that first element of Array<string> is the identificator
+ * @param prop 
+ * @returns 
+ */
+function TableRow(prop: EntryProp) {
+    function rowClicked(e: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>) {
+        console.log(e.currentTarget.firstElementChild?.nodeValue)
+    }
     return (
-        <tr>
+        <tr id={Object.values(prop.data)[0]} onClick={e=> rowClicked(e)} className="hover:bg-blue-200">
             {Object.values(prop.data).map(v => {
-                return <td>{v}</td>
+                return <td key={v}>{v}</td>
                 })}
         </tr>
     )
