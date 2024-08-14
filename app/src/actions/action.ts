@@ -169,8 +169,15 @@ export async function getTrasferimentoDetenuto(id_detenuto: string) {
     return res.rows[0]
 }
 
-export async function getOccupanti(id_cella: string) {
-    const parsedCellaCSV = id_cella.split(',')
+export interface Occupante {
+    CDI: string,
+    nome: string,
+    cognome: string
+}
+
+
+function cellaCSVToObj(id_cella_CSV: string) {
+    const parsedCellaCSV = id_cella_CSV.split(',')
     if (parsedCellaCSV == undefined || parsedCellaCSV.length !== 3) {
         throw new TypeError("Il valore della cella non è corretto")
     }
@@ -179,8 +186,12 @@ export async function getOccupanti(id_cella: string) {
         id_piano: parsedCellaCSV[1],
         id_cella: parsedCellaCSV[2]
     })
+    return cella
+}
+export async function getOccupanti(id_cella: string) {
+    const cella = cellaCSVToObj(id_cella)
     const query =
-        `
+    `
     SELECT t.carta_di_identita AS "CDI", TRIM(d.nome) AS nome, TRIM(d.cognome) AS cognome
     FROM trasferimento_letto t
     JOIN detenuto d ON t.carta_di_identita = d.carta_di_identita
@@ -188,8 +199,32 @@ export async function getOccupanti(id_cella: string) {
     `
     const client = await new Client()
     await client.connect()
-    const res = await client.query(query, [cella.id_blocco, cella.id_piano, cella.id_cella])
+    const res = await client.query<Occupante>(query, [cella.id_blocco, cella.id_piano, cella.id_cella])
     client.end()
     
     return res.rows
+}
+interface PostoLibero {
+    posti_occupati: number,
+    num_letti: number
+}
+/**
+ * 
+ * @param id_cella 
+ * @returns quanti posti liberi ci sono per la cella
+ */
+export async function getPostiLiberi(id_cella: string): Promise<number> {
+    const cella = cellaCSVToObj(id_cella)
+    const query = 
+    `
+    SELECT posti_occupati, num_letti
+    FROM cella
+    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3
+    `
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query<PostoLibero>(query, [cella.id_blocco, cella.id_piano, cella.id_cella])
+    client.end()
+
+    return res.rows[0].num_letti - res.rows[0].posti_occupati
 }

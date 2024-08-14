@@ -1,15 +1,17 @@
 'use client'
-import { TrasfDetenuto, getOccupanti, getTrasferimentoDetenuto } from "@/actions/action";
+import { Occupante, TrasfDetenuto, getOccupanti, getPostiLiberi, getTrasferimentoDetenuto } from "@/actions/action";
 import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
 import { notFound } from 'next/navigation'
 import SelectCelle from "../nuovo/SelectCelle";
+import Link from "next/link";
 
 export default function FormTrasferimento({params}: {
     params: {id_detenuto: string}
 }) {
     const [id_cella_Libera, setCellaLibera] = useState('')
-    const [occupanti, setOccupanti] = useState<any[]>([])
+    const [occupanti, setOccupanti] = useState<Array<Occupante>>([])
+    const [postiLiberi, setPostiliberi] = useState(-1)
     const defaultDetenuto: TrasfDetenuto = {
         nome: "",
         cognome: "",
@@ -41,7 +43,16 @@ export default function FormTrasferimento({params}: {
         const fetchOccupanti = async () => {
             try {
                 const occupantiData = await getOccupanti(id_cella_Libera)
-                console.log(occupantiData)
+                setOccupanti(occupantiData)
+            } catch (e) {
+                console.log(e)
+                throw new Error("Failed to fetch occupanti")
+            }
+        }
+        const fetchPostiLiberi = async () => {
+            try {
+                const postiLiberiData: number = await getPostiLiberi(id_cella_Libera)
+                setPostiliberi(postiLiberiData)
             } catch (e) {
                 console.log(e)
                 throw new Error("Failed to fetch occupanti")
@@ -49,6 +60,7 @@ export default function FormTrasferimento({params}: {
         }
         if (id_cella_Libera != '') {
             fetchOccupanti();
+            fetchPostiLiberi();
         }
     }, [id_cella_Libera]);
     return (
@@ -73,18 +85,22 @@ export default function FormTrasferimento({params}: {
                         <SelectCelle params={{onChange: handleSelectChange}}></SelectCelle>
                     </div>
                 </div>
-                <div className="invisible p-3 flex flex-row gap-x-5 justify-end">
+                <div className={occupanti.length == 0 ? 'invisible' : '' + " p-3 flex flex-row gap-x-5 justify-end"}>
+                    <div className="invisible w-1/2"></div>
                     <div className="flex flex-col w-1/2">
                         <label htmlFor="posto">Con:</label>
-                        <select defaultValue={'DEFAULT'} name="posto">
+                        <select className="py-2 px-2" defaultValue={'DEFAULT'} name="posto">
                             <option value="DEFAULT" label=" ">Scegli il detenuto con cui scambiare</option>
-                            {occupanti != undefined}
+                            {occupanti.length != 0 && occupanti.map(o => {return <option key={o.CDI} value={o.CDI}>{o.CDI + " | " + o.nome + " " + o.cognome}</option>})}
+                            {postiLiberi > 0 && <option value="libero">Posto libero ({postiLiberi})</option>}
                         </select>
                     </div>
                 </div>
                 <div className="p-3 flex gap-x-5 justify-end">
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">Invia</button>
-                    <button className="cancella bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" type="submit">Cancella</button>
+                    <Link href="/dashboard/detenuti/">
+                        <button className="cancella bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Cancella</button>
+                    </Link>
                 </div>
             </div>      
       </form>
