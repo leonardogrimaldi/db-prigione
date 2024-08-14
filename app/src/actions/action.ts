@@ -107,6 +107,7 @@ export async function getCells() {
 export async function getDetenutiPresenti(): Promise<any[]> {
     const types = require('pg').types
     types.setTypeParser(1082, (val: string) => new Date(val).toISOString().split('T')[0]);
+    types.setTypeParser(16, (val: boolean) => val ? 'no' : 'si');
     const client = await new Client()
     await client.connect()
     const query = 
@@ -115,12 +116,10 @@ export async function getDetenutiPresenti(): Promise<any[]> {
     FROM registro_detenzione r
     JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
     JOIN trasferimento_letto t ON r.inizio_detenzione = t.inizio_detenzione AND r.carta_di_identita = t.carta_di_identita
-    WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione
+    WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione AND d.deceduto IS NOT TRUE
     ORDER BY t.data_entrata DESC
-    LIMIT 1
     `
     const res = await client.query(query)
-    console.log(res.rows)
     await client.end()
     return res.rows
 }
@@ -142,7 +141,30 @@ export async function getDetenutiRientrati(): Promise<any[]> {
     LIMIT 1
     `
     const res = await client.query(query)
-    console.log(res.rows)
     await client.end()
     return res.rows
+}
+
+
+export interface TrasfDetenuto {
+    nome: string,
+    cognome: string,
+    CDI: string,
+    cella: string
+}
+export async function getTrasferimentoDetenuto(id_detenuto: string) {
+    const client = await new Client()
+    await client.connect()
+    const query = 
+    `
+    SELECT TRIM(nome) AS nome, TRIM(cognome) AS cognome, d.carta_di_identita AS "CDI", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "cella" 
+    FROM trasferimento_letto t
+    JOIN detenuto d ON t.carta_di_identita = d.carta_di_identita
+    WHERE t.carta_di_identita = $1 AND t.data_uscita IS NULL
+    ORDER BY t.data_entrata DESC
+    LIMIT 1
+    `
+    const res = await client.query<TrasfDetenuto>(query, [id_detenuto])
+
+    return res.rows[0]
 }

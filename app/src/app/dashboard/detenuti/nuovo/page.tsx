@@ -1,6 +1,7 @@
 'use client'
 import SelectCelle from "./SelectCelle"
 import { nuovoDetenuto } from "@/actions/action"
+import Link from "next/link"
 import { useFormState } from "react-dom"
 function getDate() {
     let todayDate = new Date()
@@ -42,7 +43,7 @@ export default function NuovoDetenuto() {
                             <input className="py-2 px-2" min={0} max={300} type="number" name="altezza" placeholder="in centimetri" />
                         </div>
                         <div className="flex flex-col w-full">
-                            <SelectCelle />
+                            <SelectCelle params={{onChange: null}}/>
                         </div>
                         <div className="flex flex-col w-full">
                             <label htmlFor="inizio_detenzione">Inizio detenzione:</label>
@@ -55,7 +56,10 @@ export default function NuovoDetenuto() {
                     </div>
                     <div className="p-3 flex gap-x-5 justify-end">
                         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">Invia</button>
-                        <button className="cancella bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" type="submit">Cancella</button>
+                        <Link href="/dashboard/detenuti">
+                            <button className="cancella bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Cancella</button>
+                        </Link>
+                        
                     </div>
                 </div>
             </form>
