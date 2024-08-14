@@ -1,10 +1,10 @@
 'use server'
 import { Cella, CellaSchema, Detenuto, DetenutoSchema, Registro, RegistroSchema, Trasferimento_Letto, Trasferimento_Letto_Schema } from "../../lib/types";
 import z from "zod";
-import { Client, QueryResult, types} from "pg";
+import { Client, QueryResult, types } from "pg";
 async function aggiornaPostiOccupati(c: Cella, client: Client) {
     const postiOccupati =
-    `
+        `
     SELECT COUNT(data_entrata) as occupanti
     FROM trasferimento_letto
     WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita IS NULL;
@@ -18,7 +18,7 @@ async function aggiornaPostiOccupati(c: Cella, client: Client) {
     try {
         const res = await client.query(postiOccupati, [c.id_blocco, c.id_piano, c.id_cella])
         await client.query(aggiornaPosti, [z.string().parse(res.rows[0].occupanti), c.id_blocco, c.id_piano, c.id_cella])
-    } catch(e) {
+    } catch (e) {
         console.log(e)
     }
 }
@@ -110,8 +110,8 @@ export async function getDetenutiPresenti(): Promise<any[]> {
     types.setTypeParser(16, (val: boolean) => val ? 'no' : 'si');
     const client = await new Client()
     await client.connect()
-    const query = 
-    `
+    const query =
+        `
     SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) as "Cognome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella", d.deceduto AS "Deceduto"
     FROM registro_detenzione r
     JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
@@ -130,8 +130,8 @@ export async function getDetenutiRientrati(): Promise<any[]> {
     types.setTypeParser(1082, (val: string) => new Date(val).toISOString().split('T')[0]);
     const client = await new Client()
     await client.connect()
-    const query = 
-    `
+    const query =
+        `
     SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) as "Cognome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella", d.deceduto AS "Deceduto"
     FROM registro_detenzione r
     JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
@@ -155,8 +155,8 @@ export interface TrasfDetenuto {
 export async function getTrasferimentoDetenuto(id_detenuto: string) {
     const client = await new Client()
     await client.connect()
-    const query = 
-    `
+    const query =
+        `
     SELECT TRIM(nome) AS nome, TRIM(cognome) AS cognome, d.carta_di_identita AS "CDI", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "cella" 
     FROM trasferimento_letto t
     JOIN detenuto d ON t.carta_di_identita = d.carta_di_identita
@@ -165,6 +165,31 @@ export async function getTrasferimentoDetenuto(id_detenuto: string) {
     LIMIT 1
     `
     const res = await client.query<TrasfDetenuto>(query, [id_detenuto])
-
+    client.end()
     return res.rows[0]
+}
+
+export async function getOccupanti(id_cella: string) {
+    const parsedCellaCSV = id_cella.split(',')
+    if (parsedCellaCSV == undefined || parsedCellaCSV.length !== 3) {
+        throw new TypeError("Il valore della cella non è corretto")
+    }
+    const cella: Cella = CellaSchema.parse({
+        id_blocco: parsedCellaCSV[0],
+        id_piano: parsedCellaCSV[1],
+        id_cella: parsedCellaCSV[2]
+    })
+    const query =
+        `
+    SELECT t.carta_di_identita AS "CDI", TRIM(d.nome) AS nome, TRIM(d.cognome) AS cognome
+    FROM trasferimento_letto t
+    JOIN detenuto d ON t.carta_di_identita = d.carta_di_identita
+    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita IS NULL
+    `
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query(query, [cella.id_blocco, cella.id_piano, cella.id_cella])
+    client.end()
+    
+    return res.rows
 }

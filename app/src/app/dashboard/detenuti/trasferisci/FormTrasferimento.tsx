@@ -1,5 +1,5 @@
 'use client'
-import { TrasfDetenuto, getTrasferimentoDetenuto } from "@/actions/action";
+import { TrasfDetenuto, getOccupanti, getTrasferimentoDetenuto } from "@/actions/action";
 import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
 import { notFound } from 'next/navigation'
@@ -7,7 +7,9 @@ import SelectCelle from "../nuovo/SelectCelle";
 
 export default function FormTrasferimento({params}: {
     params: {id_detenuto: string}
-}) {    
+}) {
+    const [id_cella_Libera, setCellaLibera] = useState('')
+    const [occupanti, setOccupanti] = useState<any[]>([])
     const defaultDetenuto: TrasfDetenuto = {
         nome: "",
         cognome: "",
@@ -22,22 +24,33 @@ export default function FormTrasferimento({params}: {
         return notFound()
     }
     const handleSelectChange = (id_cella_CSV: string) => {
-        console.log(id_cella_CSV)
+        setCellaLibera(id_cella_CSV)
     }
-
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await getTrasferimentoDetenuto(params.id_detenuto);
-                setDetenuto(result)
+                const detenutoData = await getTrasferimentoDetenuto(params.id_detenuto);
+                setDetenuto(detenutoData)
             } catch (e) {
                 console.log(e)
                 throw new Error("Failed to fetch data")
             }
         };
         fetchData();
-    }, []);
+        const fetchOccupanti = async () => {
+            try {
+                const occupantiData = await getOccupanti(id_cella_Libera)
+                console.log(occupantiData)
+            } catch (e) {
+                console.log(e)
+                throw new Error("Failed to fetch occupanti")
+            }
+        }
+        if (id_cella_Libera != '') {
+            fetchOccupanti();
+        }
+    }, [id_cella_Libera]);
     return (
         <form className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
             <div className="flex flex-col">
@@ -62,11 +75,10 @@ export default function FormTrasferimento({params}: {
                 </div>
                 <div className="invisible p-3 flex flex-row gap-x-5 justify-end">
                     <div className="flex flex-col w-1/2">
-                        <label htmlFor="celleLetto">Con:</label>
-                        <select className="py-2 px-2" name="celleLetto">
-                            <option label=" ">Scegli il detenuto con cui scambiare</option>
-                            <option value="volvo">Volvo</option>
-                            <option value="saab">Saab</option>
+                        <label htmlFor="posto">Con:</label>
+                        <select defaultValue={'DEFAULT'} name="posto">
+                            <option value="DEFAULT" label=" ">Scegli il detenuto con cui scambiare</option>
+                            {occupanti != undefined}
                         </select>
                     </div>
                 </div>
