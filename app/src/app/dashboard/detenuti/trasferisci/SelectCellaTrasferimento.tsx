@@ -1,10 +1,13 @@
 "use client"
 import { ChangeEvent, Fragment, useEffect, useState } from "react"
-import { getCelleLettoConSpazioLibero } from "@/actions/action"
+import { getCelleLetto, getCelleLettoConSpazioLibero } from "@/actions/action"
 import { Cella } from "../../../../../lib/types"
 
-export default function SelectCelle({params}: {
-    params: {onChange: ((id_cella_CSV: string) => void) | null}
+export default function SelectCellaTrasferimento({params}: {
+    params: {
+        onChange: ((id_cella_CSV: string) => void) | null,
+        cellaCorrente: string
+    }
 }) {
     const [celle, setCelle] = useState<Cella[]>();
 
@@ -17,7 +20,7 @@ export default function SelectCelle({params}: {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await getCelleLettoConSpazioLibero();
+                const result = await getCelleLetto();
                 setCelle(result);
             } catch {
                 throw new Error("Failed to fetch data")
@@ -33,7 +36,10 @@ export default function SelectCelle({params}: {
             <option value="DEFAULT" disabled>Seleziona una cella</option>
                 {celle?.map(c => {
                     const cellaCSV: string = c.id_blocco + "," + c.id_piano + "," + c.id_cella
-                    return <option value={cellaCSV} key={c.id_blocco + c.id_piano + c.id_cella}>{c.id_blocco + c.id_piano + "-" + c.id_cella}</option>
+                    const frontendCella: string = c.id_blocco + c.id_piano + "-" + c.id_cella
+                    if (frontendCella !== params.cellaCorrente) {
+                        return <option value={cellaCSV} key={c.id_blocco + c.id_piano + c.id_cella}>{frontendCella}</option>
+                    } 
                 })
                 }
             </select>

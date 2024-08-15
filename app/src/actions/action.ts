@@ -90,7 +90,7 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
     }
 }
 
-export async function getCells() {
+export async function getCelleLettoConSpazioLibero() {
     const client = await new Client()
     await client.connect()
     const res = await client.query<Cella>(
@@ -98,6 +98,20 @@ export async function getCells() {
         SELECT cella.id_cella, cella.id_piano, cella.id_blocco 
         FROM cella
         WHERE posti_occupati < num_letti AND tipo = 'letto'
+        `
+    )
+    client.end()
+    return res.rows
+}
+
+export async function getCelleLetto() {
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query<Cella>(
+        `
+        SELECT cella.id_cella, cella.id_piano, cella.id_blocco 
+        FROM cella
+        WHERE tipo = 'letto'
         `
     )
     client.end()
@@ -150,14 +164,16 @@ export interface TrasfDetenuto {
     nome: string,
     cognome: string,
     CDI: string,
-    cella: string
+    id_blocco: string,
+    id_piano: string,
+    id_cella: string
 }
 export async function getTrasferimentoDetenuto(id_detenuto: string) {
     const client = await new Client()
     await client.connect()
     const query =
         `
-    SELECT TRIM(nome) AS nome, TRIM(cognome) AS cognome, d.carta_di_identita AS "CDI", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "cella" 
+    SELECT TRIM(nome) AS nome, TRIM(cognome) AS cognome, d.carta_di_identita AS "CDI", t.id_blocco, t.id_piano, t.id_cella 
     FROM trasferimento_letto t
     JOIN detenuto d ON t.carta_di_identita = d.carta_di_identita
     WHERE t.carta_di_identita = $1 AND t.data_uscita IS NULL
@@ -176,7 +192,7 @@ export interface Occupante {
 }
 
 
-function cellaCSVToObj(id_cella_CSV: string) {
+function cellaCSVToObj(id_cella_CSV: string): Cella {
     const parsedCellaCSV = id_cella_CSV.split(',')
     if (parsedCellaCSV == undefined || parsedCellaCSV.length !== 3) {
         throw new TypeError("Il valore della cella non è corretto")
@@ -227,4 +243,62 @@ export async function getPostiLiberi(id_cella: string): Promise<number> {
     client.end()
 
     return res.rows[0].num_letti - res.rows[0].posti_occupati
+}
+
+export async function trasferisciDetenuto(state: any, formData: FormData) {
+    const cdi = formData.get('id') as string
+    /**
+     * Cella di cdi
+     */
+    const cellaPrimo: Cella = CellaSchema.parse({
+        id_blocco: formData.get('id_blocco'),
+        id_piano: formData.get('id_piano'),
+        id_cella: formData.get('id_cella')
+    })
+    /**
+     * Cella destinazione
+     */
+    const destinazione: Cella = cellaCSVToObj(formData.get('cella') as string)
+    /**
+     * Posto destinazione: se 'DEFAULT' allora qualunque, altrimenti è il CDI del detenuto con cui scambiare
+     */
+    const cdi_altro = formData.get('posto') as string
+    
+    const setDataUscita =
+    `
+    UPDATE trasferimento_letto t
+    SET data_uscita = NOW()
+    WHERE t.carta_di_identita = $1 AND data_uscita IS NULL
+    `
+    const insertTrasferimento =
+    `
+    INSERT INTO trasferimento_letto (data_entrata, id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita)
+    VALUES (NOW(), $1, $2, $3, (SELECT inizio_detenzione
+    FROM registro_detenzione r
+    WHERE r.carta_di_identita = $4
+    ORDER BY r.inizio_detenzione DESC
+    LIMIT 1), $4);
+    `
+    
+    const client = await new Client()
+    await client.connect()
+    try {
+        await client.query('BEGIN')
+        await client.query(setDataUscita, [cdi])
+        await client.query(insertTrasferimento, [destinazione.id_blocco, destinazione.id_piano, destinazione.id_cella, cdi])
+        aggiornaPostiOccupati(destinazione, client)
+        if (cdi_altro != 'DEFAULT') {
+            await client.query(setDataUscita, [cdi_altro])
+            await client.query(insertTrasferimento, [cellaPrimo.id_blocco, cellaPrimo.id_piano, cellaPrimo.id_cella, cdi_altro])
+            aggiornaPostiOccupati(cellaPrimo, client)
+        }
+        await client.query('COMMIT')
+    } catch (e) {
+        await client.query('ROLLBACK')
+        console.log(e)
+        return { error: e }
+    } finally {
+        await client.end()
+    }
+    
 }

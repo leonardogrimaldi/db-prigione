@@ -1,14 +1,17 @@
 'use client'
-import { Occupante, TrasfDetenuto, getOccupanti, getPostiLiberi, getTrasferimentoDetenuto } from "@/actions/action";
+import { Occupante, TrasfDetenuto, getOccupanti, getPostiLiberi, getTrasferimentoDetenuto, trasferisciDetenuto } from "@/actions/action";
 import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
 import { notFound } from 'next/navigation'
 import SelectCelle from "../nuovo/SelectCelle";
 import Link from "next/link";
+import SelectCellaTrasferimento from "./SelectCellaTrasferimento";
+import { useFormState } from "react-dom";
 
 export default function FormTrasferimento({params}: {
     params: {id_detenuto: string}
 }) {
+    const [message, formAction] = useFormState(trasferisciDetenuto, null);
     const [id_cella_Libera, setCellaLibera] = useState('')
     const [occupanti, setOccupanti] = useState<Array<Occupante>>([])
     const [postiLiberi, setPostiliberi] = useState(-1)
@@ -16,7 +19,9 @@ export default function FormTrasferimento({params}: {
         nome: "",
         cognome: "",
         CDI: "",
-        cella: ""
+        id_blocco: "",
+        id_piano: "",
+        id_cella: ""
     }
     const [detenuto, setDetenuto] = useState<TrasfDetenuto>(defaultDetenuto)
     /**
@@ -27,6 +32,10 @@ export default function FormTrasferimento({params}: {
     }
     const handleSelectChange = (id_cella_CSV: string) => {
         setCellaLibera(id_cella_CSV)
+    }
+
+    const formatCella = (t: TrasfDetenuto) => {
+        return detenuto.id_blocco + detenuto.id_piano + "-" + detenuto.id_cella;
     }
 
     useEffect(() => {
@@ -64,12 +73,12 @@ export default function FormTrasferimento({params}: {
         }
     }, [id_cella_Libera]);
     return (
-        <form className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
+        <form action={formAction} className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
             <div className="flex flex-col">
                 <div className="p-3 flex flex-row gap-x-5">
                     <div className="flex flex-col w-full ">
                         <label htmlFor="nome">Nome:</label>
-                        <input className="py-2 px-2" value={detenuto.nome + " " + detenuto.cognome} type="text" name="nome" readOnly/>
+                        <input className="py-2 px-2" value={detenuto.nome + " " + detenuto.cognome} type="text" readOnly/>
                     </div>
                     <div className="flex flex-col w-full">
                         <label htmlFor="id">Carta di identità:</label>
@@ -79,10 +88,13 @@ export default function FormTrasferimento({params}: {
                 <div className="p-3 flex flex-row gap-x-5">
                     <div className="flex flex-col w-full">
                         <label htmlFor="celleLetto">Da:</label>
-                        <input className="py-2 px-2" value={detenuto.cella} type="text" name="id_cella" readOnly/>
+                        <input value={detenuto.id_blocco} name="id_blocco" type="text" hidden readOnly></input>
+                        <input value={detenuto.id_piano} name="id_piano" type="text" hidden readOnly></input>
+                        <input value={detenuto.id_cella} name="id_cella" type="text" hidden readOnly></input>
+                        <input className="py-2 px-2" value={formatCella(detenuto)} type="text" readOnly/>
                     </div>
                     <div className="flex flex-col w-full">
-                        <SelectCelle params={{onChange: handleSelectChange}}></SelectCelle>
+                        <SelectCellaTrasferimento params={{onChange: handleSelectChange, cellaCorrente: formatCella(detenuto)}}></SelectCellaTrasferimento>
                     </div>
                 </div>
                 <div className={occupanti.length == 0 ? 'invisible' : '' + " p-3 flex flex-row gap-x-5 justify-end"}>
@@ -92,7 +104,7 @@ export default function FormTrasferimento({params}: {
                         <select className="py-2 px-2" defaultValue={'DEFAULT'} name="posto">
                             <option value="DEFAULT" label=" ">Scegli il detenuto con cui scambiare</option>
                             {occupanti.length != 0 && occupanti.map(o => {return <option key={o.CDI} value={o.CDI}>{o.CDI + " | " + o.nome + " " + o.cognome}</option>})}
-                            {postiLiberi > 0 && <option value="libero">Posto libero ({postiLiberi})</option>}
+                            {postiLiberi > 0 && <option value="DEFAULT">Posto libero ({postiLiberi})</option>}
                         </select>
                     </div>
                 </div>
@@ -102,7 +114,7 @@ export default function FormTrasferimento({params}: {
                         <button className="cancella bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Cancella</button>
                     </Link>
                 </div>
-            </div>      
+            </div>
       </form>
     )
 }
