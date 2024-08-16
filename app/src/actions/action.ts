@@ -1,7 +1,7 @@
 'use server'
 import { Cella, CellaSchema, Detenuto, DetenutoSchema, Registro, RegistroSchema, Trasferimento_Letto, Trasferimento_Letto_Schema } from "../../lib/types";
 import z from "zod";
-import { Client, QueryResult, types } from "pg";
+import { Client} from "pg";
 async function aggiornaPostiOccupati(c: Cella, client: Client) {
     const postiOccupati =
         `
@@ -20,6 +20,31 @@ async function aggiornaPostiOccupati(c: Cella, client: Client) {
         await client.query(aggiornaPosti, [z.string().parse(res.rows[0].occupanti), c.id_blocco, c.id_piano, c.id_cella])
     } catch (e) {
         console.log(e)
+    }
+}
+
+async function aggiornaPostiOccupatiNoClient(c: Cella) {
+    const client = await new Client()
+    await client.connect()
+    const postiOccupati =
+        `
+    SELECT COUNT(data_entrata) as occupanti
+    FROM trasferimento_letto
+    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita IS NULL;
+    `
+    const aggiornaPosti =
+        `
+    UPDATE cella
+    SET posti_occupati = $1
+    WHERE id_blocco = $2 AND id_piano = $3 AND id_cella = $4;
+    `
+    try {
+        const res = await client.query(postiOccupati, [c.id_blocco, c.id_piano, c.id_cella])
+        await client.query(aggiornaPosti, [z.string().parse(res.rows[0].occupanti), c.id_blocco, c.id_piano, c.id_cella])
+    } catch (e) {
+        console.log(e)
+    } finally {
+        await client.end()
     }
 }
 
@@ -116,6 +141,21 @@ export async function getCelleLetto() {
     )
     client.end()
     return res.rows
+}
+
+export async function getCella(id_detenuto: string) {
+    const client = await new Client()
+    await client.connect()
+    const query = 
+    `
+    SELECT id_blocco, id_piano, id_cella
+    FROM trasferimento_letto t
+    WHERE t.carta_di_identita = $1 AND t.data_uscita IS NULL
+    `
+    const res = await client.query<Cella>(query, [id_detenuto])
+    client.end()
+
+    return res.rows[0]
 }
 
 export async function getDetenutiPresenti(): Promise<any[]> {
@@ -250,20 +290,15 @@ export async function trasferisciDetenuto(state: any, formData: FormData) {
     /**
      * Cella di cdi
      */
-    const cellaPrimo: Cella = CellaSchema.parse({
-        id_blocco: formData.get('id_blocco'),
-        id_piano: formData.get('id_piano'),
-        id_cella: formData.get('id_cella')
-    })
+    const cellaPrimo: Cella = await getCella(cdi)
     /**
      * Cella destinazione
      */
-    const destinazione: Cella = cellaCSVToObj(formData.get('cella') as string)
+    const destinazione_form: Cella = cellaCSVToObj(formData.get('cella') as string)
     /**
      * Posto destinazione: se 'DEFAULT' allora qualunque, altrimenti è il CDI del detenuto con cui scambiare
      */
     const cdi_altro = formData.get('posto') as string
-    
     const setDataUscita =
     `
     UPDATE trasferimento_letto t
@@ -285,19 +320,27 @@ export async function trasferisciDetenuto(state: any, formData: FormData) {
     try {
         await client.query('BEGIN')
         await client.query(setDataUscita, [cdi])
-        await client.query(insertTrasferimento, [destinazione.id_blocco, destinazione.id_piano, destinazione.id_cella, cdi])
-        aggiornaPostiOccupati(destinazione, client)
+        await client.query(insertTrasferimento, [destinazione_form.id_blocco, destinazione_form.id_piano, destinazione_form.id_cella, cdi])
         if (cdi_altro != 'DEFAULT') {
+            const cellaDestinazione = await getCella(cdi_altro) 
+            if (cellaDestinazione.id_blocco !== destinazione_form.id_blocco || cellaDestinazione.id_piano !== destinazione_form.id_piano
+                || cellaDestinazione.id_cella !== destinazione_form.id_cella
+            ) {
+                console.log(cdi_altro)
+                console.log(await getCella(cdi_altro))
+                console.log(destinazione_form)
+                throw new TypeError("Il detenuto con cui scambiare non appartiene alla cella di destinazione")
+            }
             await client.query(setDataUscita, [cdi_altro])
             await client.query(insertTrasferimento, [cellaPrimo.id_blocco, cellaPrimo.id_piano, cellaPrimo.id_cella, cdi_altro])
-            aggiornaPostiOccupati(cellaPrimo, client)
         }
         await client.query('COMMIT')
     } catch (e) {
         await client.query('ROLLBACK')
         console.log(e)
-        return { error: e }
     } finally {
+        aggiornaPostiOccupatiNoClient(destinazione_form)
+        aggiornaPostiOccupatiNoClient(cellaPrimo)
         await client.end()
     }
     
