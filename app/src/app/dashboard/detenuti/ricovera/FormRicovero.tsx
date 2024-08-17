@@ -1,4 +1,42 @@
-export default function FormRicovero() {
+import { notFound } from "next/navigation"
+import SelectCellaMedica from "./SelectCellaMedica"
+import { TrasfDetenuto, getTrasferimentoDetenuto, trasferisciDetenuto } from "@/actions/action"
+import { useEffect, useState } from "react"
+import { useFormState } from "react-dom"
+
+export default function FormRicovero({params}: {
+    params: {id_detenuto: string}
+}) {
+    if (params === undefined || params.id_detenuto === undefined) {
+        return notFound()
+    }
+    const defaultDetenuto: TrasfDetenuto = {
+        nome: "",
+        cognome: "",
+        CDI: "",
+        id_blocco: "",
+        id_piano: "",
+        id_cella: ""
+    }
+    const [detenuto, setDetenuto] = useState<TrasfDetenuto>(defaultDetenuto)
+    //const [message, formAction] = useFormState(, null);
+    const [cellaSelezionata, setCellaSelezionata] = useState('')
+
+    const handleSelectChange = (id_cella_CSV: string) => {
+        setCellaSelezionata(id_cella_CSV)
+    }
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const detenutoData = await getTrasferimentoDetenuto(params.id_detenuto);
+                setDetenuto(detenutoData)
+            } catch (e) {
+                console.log(e)
+                throw new Error("Failed to fetch data")
+            }
+        };
+        fetchData();
+    }, []);
     return (
         <form className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
             <div className="flex flex-col">
@@ -14,12 +52,9 @@ export default function FormRicovero() {
                 </div>
                 <div className="p-3 flex flex-row gap-x-5">
                     <div className="flex flex-col w-1/2">
-                        <label htmlFor="celle_mediche">A:</label>
-                        <select className="py-2 px-2" name="celle_mediche">
-                            <option label=" ">Scegli una cella medica</option>
-                            <option value="volvo">Volvo</option>
-                            <option value="saab">Saab</option>
-                        </select>
+                        <SelectCellaMedica params={{
+                            onChange: null
+                        }}></SelectCellaMedica>
                     </div>
                     <div className="flex flex-col w-1/4">
                         <label htmlFor="data_inizio">Data inizio:</label>
