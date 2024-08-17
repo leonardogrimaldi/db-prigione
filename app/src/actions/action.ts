@@ -1,13 +1,25 @@
 'use server'
 import { Cella, CellaSchema, Detenuto, DetenutoSchema, Registro, RegistroSchema, Trasferimento_Letto, Trasferimento_Letto_Schema } from "../../lib/types";
-import z from "zod";
-import { Client} from "pg";
+import z, { string } from "zod";
+import { Client, types} from "pg";
 async function aggiornaPostiOccupati(c: Cella, client: Client) {
-    const postiOccupati =
+    const tipoCella = 
+    `
+    SELECT tipo
+    FROM cella
+    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3;
+    `
+    const postiOccupatiLetto =
         `
     SELECT COUNT(data_entrata) as occupanti
     FROM trasferimento_letto
     WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita IS NULL;
+    `
+    const postiOccupatiSolitaria =
+    `
+    SELECT COUNT(data_inizio) as occupanti
+    FROM isolamento
+    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND NOW() BETWEEN data_inizio AND data_fine;
     `
     const aggiornaPosti =
         `
@@ -16,8 +28,21 @@ async function aggiornaPostiOccupati(c: Cella, client: Client) {
     WHERE id_blocco = $2 AND id_piano = $3 AND id_cella = $4;
     `
     try {
-        const res = await client.query(postiOccupati, [c.id_blocco, c.id_piano, c.id_cella])
-        await client.query(aggiornaPosti, [z.string().parse(res.rows[0].occupanti), c.id_blocco, c.id_piano, c.id_cella])
+        const tipo = await client.query<{tipo: string}>(tipoCella, [c.id_blocco, c.id_piano, c.id_cella])
+        let res = null;
+        if (tipo.rows[0].tipo == 'letto') {
+            res = await client.query(postiOccupatiLetto, [c.id_blocco, c.id_piano, c.id_cella])
+        } else if (tipo.rows[0].tipo == 'solitaria') {
+            res = await client.query(postiOccupatiSolitaria, [c.id_blocco, c.id_piano, c.id_cella])
+        } else if (tipo.rows[0].tipo == 'medica') {
+            throw new Error("IMPLEMENT QUERY")
+        }
+        if (res != null) {
+            await client.query(aggiornaPosti, [z.string().parse(res.rows[0].occupanti), c.id_blocco, c.id_piano, c.id_cella])
+        } else {
+            throw new TypeError("Tipo cella non trovato")
+        }
+        
     } catch (e) {
         console.log(e)
     }
@@ -115,6 +140,20 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
     }
 }
 
+export async function getCelleSolitarieConSpazioLibero() {
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query<Cella>(
+        `
+        SELECT cella.id_cella, cella.id_piano, cella.id_blocco 
+        FROM cella
+        WHERE posti_occupati < num_letti AND tipo = 'solitaria'
+        `
+    )
+    client.end()
+    return res.rows
+}
+
 export async function getCelleLettoConSpazioLibero() {
     const client = await new Client()
     await client.connect()
@@ -166,11 +205,11 @@ export async function getDetenutiPresenti(): Promise<any[]> {
     await client.connect()
     const query =
         `
-    SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) as "Cognome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella", d.deceduto AS "Deceduto"
+    SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) as "Cognome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella"
     FROM registro_detenzione r
     JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
     JOIN trasferimento_letto t ON r.inizio_detenzione = t.inizio_detenzione AND r.carta_di_identita = t.carta_di_identita
-    WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione AND d.deceduto IS NOT TRUE
+    WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione AND d.deceduto IS NOT TRUE AND t.data_uscita IS NULL
     ORDER BY t.data_entrata DESC
     `
     const res = await client.query(query)
@@ -342,6 +381,53 @@ export async function trasferisciDetenuto(state: any, formData: FormData) {
         aggiornaPostiOccupatiNoClient(destinazione_form)
         aggiornaPostiOccupatiNoClient(cellaPrimo)
         await client.end()
-    }
-    
+    }   
 }
+
+async function getInizioDetenzione(id_detenuto: string) {
+    const client = await new Client()
+    await client.connect()
+    types.setTypeParser(1082, (val: string) => new Date(val).toISOString().split('T')[0]);
+    const query = 
+    `
+        SELECT inizio_detenzione
+        FROM registro_detenzione
+        WHERE carta_di_identita = $1 AND NOW() BETWEEN inizio_detenzione AND fine_detenzione
+        ORDER BY inizio_detenzione DESC
+        LIMIT 1
+    `
+    interface Risultato {
+        inizio_detenzione: string
+    }
+    const res = await client.query<Risultato>(query, [id_detenuto])
+    await client.end()
+    return res.rows[0].inizio_detenzione
+}
+
+export async function isolaDetenuto(state: any, formData: FormData) {
+    const client = await new Client()
+    await client.connect()
+    try {
+        const cella: Cella = cellaCSVToObj(formData.get('cella') as string)
+        const cdi: string = formData.get('id') as string
+        const data_inizio: string = formData.get('data_inizio') as string
+        const data_fine: string = formData.get('data_fine') as string
+        const motivo: string = formData.get('motivo') as string
+        const inizio_detenzione = await getInizioDetenzione(cdi)
+        await client.query('BEGIN')
+        const insertIsolamento = 
+        `
+        INSERT INTO isolamento (id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita, data_inizio, data_fine, motivo)
+        VALUES($1, $2, $3, $4, $5, NOW(), $6, $7)
+        `
+        const res = await client.query(insertIsolamento, [cella.id_blocco, cella.id_piano, cella.id_cella, inizio_detenzione, cdi, data_fine, motivo])
+        aggiornaPostiOccupati(cella, client)
+        await client.query('COMMIT')
+        
+    } catch (e) {
+        console.log(e)
+        await client.query('ROLLBACK')
+        await client.end()
+    }
+}
+
