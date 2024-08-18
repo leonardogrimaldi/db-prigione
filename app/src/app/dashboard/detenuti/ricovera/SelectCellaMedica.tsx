@@ -1,6 +1,6 @@
 "use client"
 import { ChangeEvent, Fragment, useEffect, useState } from "react"
-import { getCelleLettoConSpazioLibero, getCelleSolitarieConSpazioLibero } from "@/actions/action"
+import { getCelleMedicheConSpazioLibero } from "@/actions/action"
 import { Cella } from "../../../../../lib/types"
 
 export default function SelectCellaMedica({params}: {
@@ -17,7 +17,7 @@ export default function SelectCellaMedica({params}: {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await getCelleSolitarieConSpazioLibero();
+                const result = await getCelleMedicheConSpazioLibero();
                 setCelle(result);
             } catch {
                 throw new Error("Failed to fetch data")
@@ -33,7 +33,7 @@ export default function SelectCellaMedica({params}: {
             <option value="DEFAULT" disabled>Seleziona una cella</option>
                 {celle?.map(c => {
                     const cellaCSV: string = c.id_blocco + "," + c.id_piano + "," + c.id_cella
-                    return <option value={cellaCSV} key={c.id_blocco + c.id_piano + c.id_cella}>Solitaria {c.id_blocco + c.id_piano + "-" + c.id_cella}</option>
+                    return <option value={cellaCSV} key={c.id_blocco + c.id_piano + c.id_cella}>Medica {c.id_blocco + c.id_piano + "-" + c.id_cella}</option>
                 })
                 }
             </select>

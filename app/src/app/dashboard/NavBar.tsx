@@ -34,7 +34,7 @@ export default function NavBar() {
             </Link>
             <Link href="/dashboard/guardie">
                 <div id="guardie" className="pageLink p-2 text-lg">
-                    Guardie
+                    Personale
                 </div>
             </Link>
             <Link href="/dashboard/orari">

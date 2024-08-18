@@ -1,8 +1,10 @@
+'use client'
 import { notFound } from "next/navigation"
 import SelectCellaMedica from "./SelectCellaMedica"
-import { TrasfDetenuto, getTrasferimentoDetenuto, trasferisciDetenuto } from "@/actions/action"
+import { TrasfDetenuto, getTrasferimentoDetenuto, ricoveraDetenuto, trasferisciDetenuto } from "@/actions/action"
 import { useEffect, useState } from "react"
 import { useFormState } from "react-dom"
+import { getDate } from "../../../../../utils/utils"
 
 export default function FormRicovero({params}: {
     params: {id_detenuto: string}
@@ -19,7 +21,7 @@ export default function FormRicovero({params}: {
         id_cella: ""
     }
     const [detenuto, setDetenuto] = useState<TrasfDetenuto>(defaultDetenuto)
-    //const [message, formAction] = useFormState(, null);
+    const [message, formAction] = useFormState(ricoveraDetenuto, null);
     const [cellaSelezionata, setCellaSelezionata] = useState('')
 
     const handleSelectChange = (id_cella_CSV: string) => {
@@ -38,27 +40,27 @@ export default function FormRicovero({params}: {
         fetchData();
     }, []);
     return (
-        <form className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
+        <form action={formAction} className="bg-blue-50 pt-5 pl-5 rounded-lg w-full">
             <div className="flex flex-col">
                 <div className="p-3 flex flex-row gap-x-5">
                     <div className="flex flex-col w-full ">
                         <label htmlFor="nome">Nome:</label>
-                        <input className="py-2 px-2" value="Mario Rossi" type="text" name="nome" readOnly/>
+                        <input className="py-2 px-2" value={detenuto.nome + " " + detenuto.cognome} type="text" name="nome" readOnly/>
                     </div>
                     <div className="flex flex-col w-full">
-                        <label htmlFor="id">Id:</label>
-                        <input className="py-2 px-2" value="012345" type="text" name="id" readOnly/>
+                        <label htmlFor="id">CDI:</label>
+                        <input className="py-2 px-2" value={detenuto.CDI} type="text" name="id" readOnly/>
                     </div>
                 </div>
                 <div className="p-3 flex flex-row gap-x-5">
                     <div className="flex flex-col w-1/2">
                         <SelectCellaMedica params={{
-                            onChange: null
+                            onChange: handleSelectChange
                         }}></SelectCellaMedica>
                     </div>
                     <div className="flex flex-col w-1/4">
                         <label htmlFor="data_inizio">Data inizio:</label>
-                        <input className="py-2 px-2" type="date" name="data_inizio"/>
+                        <input className="py-2 px-2" type="date" name="data_inizio" value={getDate()} readOnly/>
                     </div>
                     <div className="flex flex-col w-1/4">
                         <label htmlFor="data_fine">Data fine:</label>

@@ -21,6 +21,12 @@ async function aggiornaPostiOccupati(c: Cella, client: Client) {
     FROM isolamento
     WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND NOW() BETWEEN data_inizio AND data_fine;
     `
+    const postiOccupatiMedica =
+    `
+    SELECT COUNT(data_inizio) as occupanti
+    FROM medica
+    WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND NOW() BETWEEN data_inizio AND data_fine;
+    `
     const aggiornaPosti =
         `
     UPDATE cella
@@ -35,7 +41,7 @@ async function aggiornaPostiOccupati(c: Cella, client: Client) {
         } else if (tipo.rows[0].tipo == 'solitaria') {
             res = await client.query(postiOccupatiSolitaria, [c.id_blocco, c.id_piano, c.id_cella])
         } else if (tipo.rows[0].tipo == 'medica') {
-            throw new Error("IMPLEMENT QUERY")
+            res = await client.query(postiOccupatiMedica, [c.id_blocco, c.id_piano, c.id_cella])
         }
         if (res != null) {
             await client.query(aggiornaPosti, [z.string().parse(res.rows[0].occupanti), c.id_blocco, c.id_piano, c.id_cella])
@@ -162,6 +168,20 @@ export async function getCelleLettoConSpazioLibero() {
         SELECT cella.id_cella, cella.id_piano, cella.id_blocco 
         FROM cella
         WHERE posti_occupati < num_letti AND tipo = 'letto'
+        `
+    )
+    client.end()
+    return res.rows
+}
+
+export async function getCelleMedicheConSpazioLibero() {
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query<Cella>(
+        `
+        SELECT cella.id_cella, cella.id_piano, cella.id_blocco 
+        FROM cella
+        WHERE posti_occupati < num_letti AND tipo = 'medica'
         `
     )
     client.end()
@@ -427,7 +447,83 @@ export async function isolaDetenuto(state: any, formData: FormData) {
     } catch (e) {
         console.log(e)
         await client.query('ROLLBACK')
+    } finally {
         await client.end()
     }
 }
 
+export async function ricoveraDetenuto(state:any, formData: FormData) {
+    const client = await new Client()
+    await client.connect()
+    try {
+        const cella: Cella = cellaCSVToObj(formData.get('cella') as string)
+        const cdi: string = formData.get('id') as string
+        const data_inizio: string = formData.get('data_inizio') as string
+        const data_fine: string = formData.get('data_fine') as string
+        const prognosi: string = formData.get('prognosi') as string
+        const inizio_detenzione = await getInizioDetenzione(cdi)
+        await client.query('BEGIN')
+        const insertRicovero = 
+        `
+        INSERT INTO ricovero (id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita, data_inizio, data_fine, dettaglio)
+        VALUES($1, $2, $3, $4, $5, NOW(), $6, $7)
+        `
+        const res = await client.query(insertRicovero, [cella.id_blocco, cella.id_piano, cella.id_cella, inizio_detenzione, cdi, data_fine, prognosi])
+        aggiornaPostiOccupati(cella, client)
+        await client.query('COMMIT')
+        
+    } catch (e) {
+        console.log(e)
+        await client.query('ROLLBACK')
+    } finally {
+        await client.end()
+    }
+}
+
+export async function getPersonale() {
+
+}
+
+export async function nuovoPersonale(state: any, formData: FormData) {
+    const personale = {
+        badge: formData.get('badge') as string,
+        nome: formData.get('nome') as string,
+        cognome: formData.get('cognome') as string,
+        codice_fiscale: formData.get('codice_fiscale') as string,
+        sesso: formData.get('sesso') as string,
+        password: formData.get('password') as string | null,
+        guardia: formData.get('guardia') != null ? true : false
+    }
+    const insertPersonale = 
+    `
+    INSERT INTO personale (badge, nome, cognome, codice_fiscale, sesso)
+    VALUES ($1, $2, $3, $4, $5)
+    `
+    const insertGuardia = 
+    `
+    INSERT INTO guardia (badge)
+    VALUES ($1)
+    `
+    const insertAmministratore = 
+    `
+    INSERT INTO amministratore (badge, password)
+    VALUES ($1, $2)
+    `
+    const client = await new Client()
+    try {
+        await client.connect()
+        await client.query('BEGIN')
+        await client.query(insertPersonale, [personale.badge, personale.nome, personale.cognome, personale.codice_fiscale, personale.sesso])
+        if (personale.password != null) {
+            await client.query(insertAmministratore, [personale.badge, personale.password])
+        }
+        if (personale.guardia) {
+            await client.query(insertGuardia, [personale.badge])
+        }
+        await client.query('COMMIT')
+    } catch {
+        await client.query('ROLLBACK')
+    } finally {
+        await client.end()
+    }
+}
