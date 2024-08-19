@@ -481,7 +481,24 @@ export async function ricoveraDetenuto(state:any, formData: FormData) {
 }
 
 export async function getPersonale() {
+    const selectPersonale = 
+    `
+    SELECT p.badge as "Badge", p.nome as "Nome", p.cognome as "Cognome", p.codice_fiscale as "Codice fiscale", p.sesso as "Sesso", 
+        (SELECT COUNT(*) AS num
+        FROM guardia g
+        WHERE p.badge = g.badge) AS "Guardia",
+        (SELECT COUNT(*) AS num
+        FROM amministratore a
+        WHERE p.badge = a.badge) AS "Amministratore"
+    FROM personale p
+    `
 
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query(selectPersonale)
+    await client.end()
+
+    return res.rows
 }
 
 export async function nuovoPersonale(state: any, formData: FormData) {

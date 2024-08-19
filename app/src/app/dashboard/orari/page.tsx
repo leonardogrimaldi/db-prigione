@@ -17,8 +17,8 @@ export default function Orari() {
                     <option value="B">B</option>
                     <option value="C">C</option>
                 </select>
-                <label className="py-2 px-2" htmlFor="piani">Piani:</label>
-                <select className="py-2 px-2" name="piani">
+                <label className="py-2 px-2" htmlFor="piani">Piano:</label>
+                <select className="py-2 px-2" name="piano">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>

@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import {getDetenutiPresenti, getDetenutiRientrati } from "@/actions/action";
+import {getDetenutiPresenti, getDetenutiRientrati, getPersonale } from "@/actions/action";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import DataTable from "../detenuti/DataTable";
 
@@ -11,7 +11,7 @@ export default function Guardie() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await getDetenutiPresenti();
+                const result = await getPersonale();
                 console.log(result)
                 setData(result)
             } catch (e) {
