@@ -1,6 +1,19 @@
+'use client'
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import SelectBlocco from "./SelectBlocco";
+import { getDate, getWeekNumber, zeroPad } from "../../../../utils/utils";
 
 export default function Orari() {
+    const today = new Date()
+    /**
+     * Uses zeroPad to pad getWeekNumber: example 1 becomes 01 
+     * to make it conform to the <input type="week"> defaultValue 
+     */
+    const dateDefaultValue= today.getFullYear() + "-W" + zeroPad(getWeekNumber(today), 2)
+    const [date, setDate] = useState()
+    const [bloccoPiano, setBloccoPiano] = useState('')
+    console.log()
     return(
         <div className="flex flex-col">
             <div className="flex flex-row gap-x-2">
@@ -11,20 +24,11 @@ export default function Orari() {
                     </Link>
                 </div>
             <div className="flex flex-row gap-x-4 justify-center bg-gray-200">
-                <label className="py-2 px-2" htmlFor="blocchi">Blocco:</label>
-                <select className="py-2 px-2" name="blocchi">
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                </select>
-                <label className="py-2 px-2" htmlFor="piani">Piano:</label>
-                <select className="py-2 px-2" name="piano">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                </select>
+                <SelectBlocco params={{
+                    onChange: null
+                }}></SelectBlocco>
                 <label className="py-2 px-2" htmlFor="settimana">Settimana:</label>
-                <input className="py-2 px-2"  type="week" name="settimana"></input>
+                <input className="py-2 px-2"  type="week" name="settimana" defaultValue={dateDefaultValue}  ></input>
             </div>
             <div className="grid grid-cols-8 grid-rows-4">
                 <div></div>

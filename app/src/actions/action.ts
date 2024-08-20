@@ -2,6 +2,7 @@
 import { Cella, CellaSchema, Detenuto, DetenutoSchema, Registro, RegistroSchema, Trasferimento_Letto, Trasferimento_Letto_Schema } from "../../lib/types";
 import z, { string } from "zod";
 import { Client, types} from "pg";
+import { exit } from "process";
 async function aggiornaPostiOccupati(c: Cella, client: Client) {
     const tipoCella = 
     `
@@ -215,6 +216,24 @@ export async function getCella(id_detenuto: string) {
     client.end()
 
     return res.rows[0]
+}
+
+export interface Piano {
+    id_blocco: string
+    id_piano: string
+}
+
+export async function getBloccoPianiConOrario(): Promise<Piano[]> {
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query<Piano>(
+        `
+        SELECT DISTINCT id_piano, id_blocco
+        FROM registro_orari
+        `
+    )
+    client.end()
+    return res.rows
 }
 
 export async function getDetenutiPresenti(): Promise<any[]> {
@@ -542,5 +561,84 @@ export async function nuovoPersonale(state: any, formData: FormData) {
         await client.query('ROLLBACK')
     } finally {
         await client.end()
+    }
+}
+export interface Guardie {
+    badge: string
+    nome: string
+    cognome: string
+}
+
+export async function getGuardie(): Promise<Guardie[]> {
+    const selectGuardie =
+    `
+    SELECT p.badge, TRIM(p.nome) AS "nome", TRIM(p.cognome) AS "cognome"
+    FROM personale p
+    JOIN guardia g ON p.badge = g.badge
+    `
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query<Guardie>(selectGuardie)
+    await client.end()
+
+    return res.rows
+}
+
+export async function insertOrario(turno: string, giorno: number, badge: string, data_inizio: string, data_fine: string, blocco: string, piano:string) {
+    const query = 
+    `
+    INSERT INTO registro_orari (badge, data_inizio, data_fine, giorno, ora_inizio, id_blocco, id_piano)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `
+    const turnoOra = new Map<string, string>([
+        ["m", "06:00:00"],
+        ["p", "14:00:00"],
+        ["s", "22:00:00"]
+    ]) 
+    if (!turnoOra.has(turno)) {
+        throw TypeError("Il turno passato non è presente")
+    }
+    const ora_inizio = turnoOra.get(turno)
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query(query, [badge, data_inizio, data_fine, giorno, ora_inizio, blocco, piano])
+    await client.end()
+}
+
+export async function nuovoOrarioGuardia(state:any, formData: FormData) {
+    const giorni = 7
+
+    console.log(formData)
+    interface GuardiaOrario {
+        badge: string,
+        data_inizio: string
+        data_fine: string
+        blocco_piano: string
+    }
+    const g: GuardiaOrario = {
+        badge: formData.get('guardia') as string,
+        data_inizio: formData.get('data_inizio') as string,
+        data_fine: formData.get('data_fine') as string,
+        blocco_piano: formData.get('blocco_piano') as string
+    }
+    const turni: string[] = ["m", "p", "s"]
+    for(let i = 0; i < giorni; i++) {
+        for (const t of turni) {
+            const formatGiornoTurno = t + "-" + i.toString()
+            if (formData.has(formatGiornoTurno)) {
+                const active = formData.get(formatGiornoTurno) as string == 'on' ? true: false
+                if (active) {
+                    const parsedBloccoPiano = g.blocco_piano.split(',')
+                    if (parsedBloccoPiano.length != 2) {
+                        throw TypeError("Blocco piano passato sbagliato")
+                    }
+                    insertOrario(t, i, g.badge, g.data_inizio, g.data_fine, parsedBloccoPiano[0], parsedBloccoPiano[1])
+                }
+                /**
+                 * Non ci possono essere più di 1 turno al giorno quindi faccio il break
+                 */
+                break;
+            }
+        }
     }
 }
