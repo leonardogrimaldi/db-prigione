@@ -642,3 +642,30 @@ export async function nuovoOrarioGuardia(state:any, formData: FormData) {
         }
     }
 }
+
+export interface PersonaleOrario {
+    badge: string,
+    giorno: number,
+    ora_inizio: string,
+    nome: string,
+    cognome: string,
+}
+
+export async function getOrario(blocco: string, piano: string, data_inizio_settimana: string): Promise<PersonaleOrario[]> {
+    console.log(blocco)
+    console.log(piano)
+    console.log(data_inizio_settimana)
+    const query = 
+    `
+    SELECT r.badge, r.giorno, r.ora_inizio, TRIM(p.nome) AS nome, TRIM(p.cognome) AS cognome
+    FROM registro_orari r
+    JOIN personale p ON p.badge = r.badge
+    WHERE id_blocco = $1 AND id_piano = $2 AND data_inizio BETWEEN DATE($3) + 1 AND DATE($3) + 7 AND DATE($3) + 7 <= data_fine
+    `
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query<PersonaleOrario>(query, [blocco, piano, data_inizio_settimana])
+    await client.end()
+    
+    return res.rows
+}
