@@ -20,3 +20,9 @@ export function getDateOfWeek(y: number, w: number) {
 
     return new Date(y, 0, d).toISOString().split('T')[0];
 }
+
+export const turni = {
+    mattina: "06:00:00",
+    pomeriggio: "14:00:00",
+    sera: "22:00:00"
+}

@@ -1,0 +1,22 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@videsk/tailwind-random-color':
+        specifier: 0.2.0-beta
+        version: 0.2.0-beta
+
+packages:
+
+  '@videsk/tailwind-random-color@0.2.0-beta':
+    resolution: {integrity: sha512-RSwT59cb4qihrTRXiLTxCYNXfv+q1BXphaZKPTetXtCIR9nCKaPreENxUASgzgr+LFgS0efT4aw2iStUT12EWQ==}
+
+snapshots:
+
+  '@videsk/tailwind-random-color@0.2.0-beta': {}

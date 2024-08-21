@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"@videsk/tailwind-random-color": "0.2.0-beta"
+	}
+}

@@ -36,6 +36,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
+      '@videsk/tailwind-random-color':
+        specifier: 0.2.0-beta
+        version: 0.2.0-beta
       eslint:
         specifier: ^9.7.0
         version: 9.7.0
@@ -388,6 +391,9 @@ packages:
   '@typescript-eslint/visitor-keys@7.2.0':
     resolution: {integrity: sha512-c6EIQRHhcpl6+tO8EMR+kjkkV+ugUNXOmeASA1rlzkd8EPIriavpWoiEz1HR/VLhbVIdhqnV6E7JZm00cBDx2A==}
     engines: {node: ^16.0.0 || >=18.0.0}
+
+  '@videsk/tailwind-random-color@0.2.0-beta':
+    resolution: {integrity: sha512-RSwT59cb4qihrTRXiLTxCYNXfv+q1BXphaZKPTetXtCIR9nCKaPreENxUASgzgr+LFgS0efT4aw2iStUT12EWQ==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -1988,6 +1994,8 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.2.0
       eslint-visitor-keys: 3.4.3
+
+  '@videsk/tailwind-random-color@0.2.0-beta': {}
 
   acorn-jsx@5.3.2(acorn@8.12.1):
     dependencies:

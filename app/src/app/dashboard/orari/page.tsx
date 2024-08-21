@@ -2,9 +2,8 @@
 import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
 import SelectBlocco from "./SelectBlocco";
-import { getDate, getDateOfWeek, getWeekNumber, zeroPad } from "../../../../utils/utils";
+import { getDate, getDateOfWeek, getWeekNumber, turni, zeroPad } from "../../../../utils/utils";
 import { PersonaleOrario, getOrario } from "@/actions/action";
-
 export default function Orari() {
     const today = new Date()
     /**
@@ -57,7 +56,16 @@ export default function Orari() {
                 <label className="py-2 px-2" htmlFor="settimana">Settimana:</label>
                 <input className="py-2 px-2"  type="week" name="settimana" defaultValue={dateDefaultValue} onChange={(e) => handleDateChange(e)} ></input>
             </div>
-            <div className="grid grid-cols-8 grid-rows-4">
+            {data && <TableOrario params={data}></TableOrario>}
+        </div>
+    )
+}
+
+function TableOrario({params}: {
+    params: PersonaleOrario[]
+}) {
+    return (
+        <div className="grid grid-cols-8 grid-rows-4 w-max">
                 <div></div>
                 <div>Lunedì</div>
                 <div>Martedì</div>
@@ -67,20 +75,21 @@ export default function Orari() {
                 <div>Sabato</div>
                 <div>Domenica</div>
                 <div>Mattina</div>
-                {Array.from(Array(7).keys()).map(e => {return <Guardia key={e} badge={e} text={e.toString()}/>})}
+                {Array.from(Array(7).keys()).map(e => {return <div key={e} id={"m" + e}>{params.filter(g => g.giorno == e && g.ora_inizio == turni.mattina).map(g => {return <Guardia key={g.badge} params={g}/>})}</div>})}
                 <div>Pomeriggio</div>
-                {Array.from(Array(7).keys()).map(e => {return <Guardia key={e} badge={e} text={e.toString()}/>})}
+                {Array.from(Array(7).keys()).map(e => {return <div key={e} id={"p" + e}>{params.filter(g => g.giorno == e && g.ora_inizio == turni.pomeriggio).map(g => {return <Guardia key={g.badge} params={g}/>})}</div>})}
                 <div>Sera</div>
-                {Array.from(Array(7).keys()).map(e => {return <Guardia key={e} badge={e} text={e.toString()}/>})}
+                {Array.from(Array(7).keys()).map(e => {return <div key={e} id={"s" + e}>{params.filter(g => g.giorno == e && g.ora_inizio == turni.sera).map(g => {return <Guardia key={g.badge} params={g}/>})}</div>})}
             </div>
-        </div>
     )
 }
 
-function Guardia({badge, text}: {badge: number; text: string}) {
+function Guardia({params}: {
+    params: PersonaleOrario 
+}) {
     return (
-        <div className="hover:bg-blue-300" id={badge.toString()}>
-            {text}
+        <div className="hover:bg-blue-300 bg-white drop-shadow-lg p-2 rounded-xl text-sm" id={params.badge}>
+            {params.badge + " | " + params.nome + " " + params.cognome}
         </div>
     )
 }

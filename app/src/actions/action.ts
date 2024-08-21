@@ -607,8 +607,6 @@ export async function insertOrario(turno: string, giorno: number, badge: string,
 
 export async function nuovoOrarioGuardia(state:any, formData: FormData) {
     const giorni = 7
-
-    console.log(formData)
     interface GuardiaOrario {
         badge: string,
         data_inizio: string
