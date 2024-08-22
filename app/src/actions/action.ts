@@ -236,6 +236,19 @@ export async function getBloccoPianiConOrario(): Promise<Piano[]> {
     return res.rows
 }
 
+export async function getBloccoPiani(): Promise<Piano[]> {
+    const client = await new Client()
+    await client.connect()
+    const res = await client.query<Piano>(
+        `
+        SELECT id_piano, id_blocco
+        FROM piano
+        `
+    )
+    client.end()
+    return res.rows
+}
+
 export async function getDetenutiPresenti(): Promise<any[]> {
     const types = require('pg').types
     types.setTypeParser(1082, (val: string) => new Date(val).toISOString().split('T')[0]);
@@ -658,7 +671,7 @@ export async function getOrario(blocco: string, piano: string, data_inizio_setti
     SELECT r.badge, r.giorno, r.ora_inizio, TRIM(p.nome) AS nome, TRIM(p.cognome) AS cognome
     FROM registro_orari r
     JOIN personale p ON p.badge = r.badge
-    WHERE id_blocco = $1 AND id_piano = $2 AND data_inizio BETWEEN DATE($3) + 1 AND DATE($3) + 7 AND DATE($3) + 7 <= data_fine
+    WHERE id_blocco = $1 AND id_piano = $2 AND NOT (data_inizio > DATE($3) + 7 OR data_fine < DATE($3) + 1)
     `
     const client = await new Client()
     await client.connect()
@@ -666,4 +679,41 @@ export async function getOrario(blocco: string, piano: string, data_inizio_setti
     await client.end()
     
     return res.rows
+}
+
+export interface GiornoCont {
+    date: string,
+    numero: number
+}
+export async function getAndamentoSettimanale(): Promise<GiornoCont[]> {
+    const query =
+    `
+    SELECT inizio_detenzione AS "date", COUNT(carta_di_identita) AS "numero"
+    FROM registro_detenzione
+    WHERE inizio_detenzione BETWEEN DATE(NOW()) - 7 AND DATE(NOW())
+    GROUP BY inizio_detenzione
+    ORDER BY inizio_detenzione ASC
+    `
+    const client = await new Client()
+    await client.connect()
+    types.setTypeParser(1082, (val: string) => new Date(val).toISOString().split('T')[0]);
+    const res = await client.query<GiornoCont>(query)
+    await client.end()
+
+    return res.rows
+}
+
+export async function topCinqueSpostamentiSolitaria() {
+    const client = await new Client()
+    await client.connect()
+    const query = 
+    `
+    SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) AS "Cognome", COUNT(i.carta_di_identita) AS num
+    FROM isolamento i
+    JOIN detenuto d ON i.carta_di_identita = d.carta_di_identita
+    GROUP BY i.carta_di_identita
+    ORDER BY num DESC
+    LIMIT 5
+    `
+    await client.end()
 }

@@ -49,14 +49,14 @@ export default function Orari() {
                         </button>
                     </Link>
                 </div>
-            <div className="flex flex-row gap-x-4 justify-center bg-gray-200">
+            <div className="flex flex-row gap-x-4 justify-center bg-gray-200 items-center">
                 <SelectBlocco params={{
                     onChange: handleBloccoChange
                 }}></SelectBlocco>
                 <label className="py-2 px-2" htmlFor="settimana">Settimana:</label>
                 <input className="py-2 px-2"  type="week" name="settimana" defaultValue={dateDefaultValue} onChange={(e) => handleDateChange(e)} ></input>
             </div>
-            {data && <TableOrario params={data}></TableOrario>}
+            {data && data.length != 0 && <TableOrario params={data}></TableOrario>}
         </div>
     )
 }
@@ -65,20 +65,16 @@ function TableOrario({params}: {
     params: PersonaleOrario[]
 }) {
     return (
-        <div className="grid grid-cols-8 grid-rows-4 w-max">
+        <div className="grid grid-cols-8 grid-rows-4 w-max bg-blue-200 rounded-md w-fit">
                 <div></div>
-                <div>Lunedì</div>
-                <div>Martedì</div>
-                <div>Mercoledì</div>
-                <div>Giovedì</div>
-                <div>Venerdì</div>
-                <div>Sabato</div>
-                <div>Domenica</div>
-                <div>Mattina</div>
+                {['Lunedì','Martedì', 'Mercoledì','Giovedì','Venerdì','Sabato','Domenica'].map(d => {
+                    return <div className="border-l-4 border-gray-100 flex items-center justify-center">{d}</div>
+                })}
+                <div className="border-2 border-white rounded-md bg-yellow-400 flex items-center justify-center">Mattina</div>
                 {Array.from(Array(7).keys()).map(e => {return <div key={e} id={"m" + e}>{params.filter(g => g.giorno == e && g.ora_inizio == turni.mattina).map(g => {return <Guardia key={g.badge} params={g}/>})}</div>})}
-                <div>Pomeriggio</div>
+                <div className="border-2 border-white rounded-md bg-blue-400 flex items-center justify-center">Pomeriggio</div>
                 {Array.from(Array(7).keys()).map(e => {return <div key={e} id={"p" + e}>{params.filter(g => g.giorno == e && g.ora_inizio == turni.pomeriggio).map(g => {return <Guardia key={g.badge} params={g}/>})}</div>})}
-                <div>Sera</div>
+                <div className="border-2 border-white rounded-md bg-gray-400 flex items-center justify-center">Sera</div>
                 {Array.from(Array(7).keys()).map(e => {return <div key={e} id={"s" + e}>{params.filter(g => g.giorno == e && g.ora_inizio == turni.sera).map(g => {return <Guardia key={g.badge} params={g}/>})}</div>})}
             </div>
     )

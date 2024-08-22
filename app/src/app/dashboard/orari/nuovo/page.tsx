@@ -1,7 +1,7 @@
 'use client'
 import { Fragment, useState } from "react"
 import SelectGuardia from "./SelectGuardia"
-import SelectBlocco from "../SelectBlocco"
+import SelectBlocco, { SelectBloccoPiano } from "../SelectBlocco"
 import Link from "next/link"
 import { useFormState } from "react-dom"
 import { nuovoOrarioGuardia } from "@/actions/action"
@@ -39,7 +39,6 @@ export default function NuovoOrarioGuardia() {
                 </div>
                 {guardia && <Fragment>
                     <InputOrario></InputOrario>
-                    <CardOrario {...ora} ></CardOrario>
                     <div className="p-3 flex gap-x-5 justify-end">
                         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">Invia</button>
                         <Link href={"/dashboard/orari"}>
@@ -117,7 +116,7 @@ function InputOrario() {
         
     }
     return (
-        <div className="flex flex-col bg-blue-100">
+        <div className="flex flex-col">
             <div className="p-3">Nuovo orario</div>
             <div className="p-3 flex flex-row gap-x-5">
                 <div className="flex flex-col w-full">
@@ -129,9 +128,9 @@ function InputOrario() {
                     <input className="py-2 px-2" type="date" name="data_fine"/>
                 </div>
                 <div className="flex flex-col w-full">
-                    <SelectBlocco params={{
+                    <SelectBloccoPiano params={{
                         onChange: null
-                    }}></SelectBlocco>
+                    }}></SelectBloccoPiano>
                 </div>
                 
             </div>
