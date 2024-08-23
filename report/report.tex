@@ -9,6 +9,7 @@
 \usepackage{lineno}
 \usepackage{array}
 \usepackage{tabularray}
+\usepackage{pdfpages}
 % Questo commentalo se vuoi scrivere in inglese.
 \usepackage[italian]{babel}
 \graphicspath{{./images/}}
@@ -75,7 +76,6 @@ Di loro si vuole memorizzare inoltre:
 \begin{itemize}
     \item Nome, cognome, codice fiscale e sesso.
 \end{itemize}
-Il sistema non dovrà gestire la storicizzazione del personale e dei cambi di orario.
 \end{linenumbers}
 \section{Estrazione dei concetti principali}
 Dall'intervista si possono estrapolare diverse figure che consentiranno di modellare lo schema concettuale.
@@ -125,6 +125,7 @@ L'orario di lavoro che sarà assegnato alle guardie.
 Avrà tre turni: mattina (06:00 - 14:00), pomeriggio (14:00 - 22:00) e notte (22:00 - 06:00).
 \chapter{Progettazione concettuale}
 \section{Schema scheletro}
+\includepdf[pages={1}, landscape=true, scale=1]{./images/schema_scheletro_finale.pdf}
 %\includegraphics[angle=-90]{er_scheletro_prigione}
 \section{Raffinamenti proposti}
 Lo schema scheletro è una rappresentazione fedele ai concetti principali estratti nella sezione precedente, ma contiene anche un paio di elementi aggiuntivi che è stato necessario definire per modellare correttamente il dominio.
@@ -145,19 +146,16 @@ L'entità REGISTRO\_ORARIO consente di storicizzare gli orari di lavoro delle GU
 %
 Le cardinalità delle associazioni riferite a questa entità sono state ideate in modo tale da consentire a più GUARDIE di pattugliare un piano e una GUARDIA avere un solo PIANO da controllare in un ORARIO.
 \section{Schema concettuale finale}
+\includepdf[pages={1}, landscape=true, scale=1]{./images/er_finale.pdf}
 %\includegraphics[angle=-90]{er_finale_prigione}
-\chapter{Progettazione logica}ò
+\chapter{Progettazione logica}
 \section{Stima del volume dei dati}
-Parlando con il committente.
+Per avere una stima più del volume più precisa si è chiesto al committente la struttura del carcere.
 %
-La capacità del carcere è di 400 persone, di cui all'incirca 50 rientrano ogni tre anni.
-%
-Vi sono la sezione A e B con due piani e 50 celle ciascuna, abilitate a ospitare massimo due persone.
+La capacità è di 400 persone e vi sono la sezione A e B con due piani e 50 celle ciascuna, abilitate a ospitare massimo due persone.
 %
 Inoltre, vi è anche la sezione C composta anch'essa da due piani: il primo piano 10 celle solitarie, il secondo 10 celle mediche.
 %
-
-
 \begin{table}[H]
 \begin{tabular}{lll}
 \hline
@@ -183,13 +181,13 @@ cella\_piano & A & 220 \\
 PIANO & E & 6 \\
 piano\_blocco & A & 6 \\
 BLOCCO & E & 3 \\
-controllo\_piano & A & \\
-REGISTRO\_ORARI & E & \\
-controllo\_guardia & A & \\
+controllo\_piano & A & 175 \\
+REGISTRO\_ORARI & E & 175 \\
+controllo\_guardia & A & 175 \\
 GUARDIA & E & 25 \\
 AMMINISTRATORE & E & 10 \\
 PERSONALE & E & 35 \\
-orario\_controllo & A & \\
+orario\_controllo & A & 175 \\
 ORARIO & E & 21 \\
 orario\_turno & A & 21 \\
 TURNO & E & 3 \\
@@ -200,18 +198,17 @@ TURNO & E & 3 \\
 \begin{tabular}{p{9cm} p{2cm} p{1cm}}
 \hline
 Operazione & Frequenza & Tipo \\ \hline
-Inserimento nuovo detenuto & 2/giorno &  \\
-Scambio posto letto con un altro detenuto & 5/mese &  \\
-Ricovero & 5/mese & \\
-Isolamento & 3/mese & \\
-Inserimento nel registro di un vecchio detenuto & 1/mese & \\
-Inserimento nuova guardia & 5/anno & \\
-Inserimento nuovo amministratore & 2/anno & \\
-Cambio orario guardia & 6/mese & \\
-Visualizzare la lista dei detenuti presenti & 50/giorno & \\
-Visualizzare i detenuti rientrati in prigione & 2/mese & \\
-Visualizzare l'andamento settimanale di nuovi detenuti & 60/giorno & \\
-Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitarie più volte & 2/mese &
+Inserimento nuovo detenuto & 2/giorno & I \\
+Scambio posto letto con un altro detenuto & 5/mese & I \\
+Ricoverare un detenuto & 5/mese & I \\
+Isolare un detenuto & 3/mese & I \\
+Inserimento nuova guardia & 5/anno & I \\
+Inserimento nuovo amministratore & 2/anno & I \\
+Visualizzare il personale (amministratori, guardie) & 20/giorno & B\\
+Visualizzare la lista dei detenuti presenti & 50/giorno & B\\
+Visualizzare l'andamento settimanale di nuovi detenuti & 60/giorno & B \\
+Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitarie più volte & 50/mese & B \\
+Inserimento nuovo orario & 5/mese & I 
 \end{tabular}
 \end{table}
 \section{Schemi di navigazione e tabelle degli accessi}
@@ -224,7 +221,7 @@ Le scritture costano il doppio.
     \item Inserirlo nel registro
     \item Leggere le celle letto libere
         \begin{description}
-            \item[Richiede:] Leggere i trasferimenti con data uscita NULL
+            \item[Richiede:] Contare i trasferimenti con data uscita NULL per ogni singola cella e verificare che siano minori del numero letti
         \end{description}
     \item Inserirlo in una cella letto
 \end{enumerate}
@@ -232,65 +229,42 @@ Le scritture costano il doppio.
 \begin{tabular}{p{5cm} p{2cm} p{2cm} p{1cm}}
 \hline
 Concetto & Costrutto & Accessi & Tipo \\ \hline
-DETENUTO & E & 500 & L \\
 DETENUTO & E & 1 & S \\
 registro\_detenuto & A & 1 & S \\
 REGISTRO\_DETENZIONE & E & 1 & S \\
 TRASFERIMENTO\_LETTO & E & \(200 * 2 = 400\) & L \\
-trasf\_detenuto & A & 400 & L \\
-REGISTRO\_DETENZIONE & E & 400 & L \\
-registro\_detenuto & A & 400 & L \\
-DETENUTO & E & 400 & L \\
 trasf\_detenuto & A & 1 & S \\
 TRASFERIMENTO\_LETTO & E & 1 & S \\
 assegnazione\_letto & A & 1 & S \\
 \end{tabular}
 \end{table}
-Nota: 200 * 2 = 400 Perché 200 sono le celle letto e 2 sono i posti letto
+Nota: \(200 * 2 = 400\) perché 200 sono le celle letto e due sono i posti letto.
 %
-
-Costo totale: \(6S * 2 * 2/g= 24\)
+Costo totale: \((6S * 2 + 400L) * 2/g= 824\)
 \newline
-\includegraphics[max size={\textwidth}{\textheight}]{op_1_inserire_nuovo_detenuto}
+\includegraphics[max size={\textwidth}{\textheight}]{inserire_nuovo_detenuto_con_frecce.png}
 \subsection{Scambio posto letto con un altro detenuto}
 \begin{itemize}
-    \item Ho l'id di due detenuti 
-    \item Leggo il loro ultimo trasferimento letto
-    \item 
+    \item Visualizzare le celle letto
+    \item Visualizzare gli occupanti della cella selezionata
+    \item Aggiornare la data uscita del TRASFERIMENTO\_LETTO del primo detenuto
+    \item Inserire un nuovo trasferimento per la cella di destinazione
+    \item Aggiornare la data uscita del TRASFERIMENTO\_LETTO dell'altro detenuto
+    \item Inserire un nuovo trasferimento per l'altro detenuto nella cella del primo
 \end{itemize}
 \begin{table}[H]
 \begin{tabular}{p{5cm} p{2cm} p{1cm} p{1cm}}
 \hline
 Concetto & Costrutto & Accessi & Tipo \\ \hline
-DETENUTO & E & 2 & L \\
-registro\_detenuto & A & 2 & L \\
-REGISTRO\_DETENZIONE & E & 2 & L \\
-trasf\_detenuto & A & 2 & L \\
+LETTO & E & 200 & L \\
 TRASFERIMENTO\_LETTO & E & 2 & L \\
-assegnazione\_letto & A & 2 & L \\
+DETENUTO & E & 2 & L \\
 trasf\_detenuto & A & 2 & S \\
-TRASFERIMENTO\_LETTO & E & 2 & S \\
+TRASFERIMENTO\_LETTO & E & 4 & S \\
 assegnazione\_letto & A & 2 & S \\
 \end{tabular}
 \end{table}
-\subsection{Ricovero}
-\begin{table}[H]
-\begin{tabular}{p{5cm} p{2cm} p{3cm} p{1cm}}
-\hline
-Concetto & Costrutto & Accessi & Tipo \\ \hline
-DETENUTO & E & 1 & L \\
-registro\_detenuto & A & \(700 / 500 = 1.4 \) & L \\
-REGISTRO\_DETENZIONE & E & 1 & L \\
-ricovero\_detenuto & A & \(350 / 700 = 0.5\) & L \\
-RICOVERO & E & 0.5 & L \\
-MEDICA & E & 10 & L \\
-spostamento\_medica & A & 10 & L \\
-RICOVERO & E & 10 & L \\
-ricovero\_detenuto & A & 1 & S \\
-RICOVERO & E & 1 & S \\
-spostamento\_medica & A & 1 & S \\
-\end{tabular}
-\end{table}
+Costo totale: \((8S * 2 + 204L) * 5/30g = 36.7\)
 \section{Raffinamento dello schema}
 \subsection{Specializzazione Amministratore e Guardia}
 Per mappare la specializzazione si è deciso di creare una relazione per ogni sottoclasse (in questo caso due) e inserire gli attributi nelle corrispondenti, nonché una chiave esterna che si riferisca alla chiave primaria badge della relazione PERSONALE.
@@ -320,16 +294,171 @@ Dopo l'aggiunta dell'attributo ridondante, la tabella della sezione \ref{inserim
 \begin{tabular}{p{6cm} p{2cm} p{1cm} p{1cm}}
 \hline
 Concetto & Costrutto & Accessi & Tipo \\ \hline
-DETENUTO & E & 500 & L \\
-LETTO & E & 200 & L \\
 DETENUTO & E & 1 & S \\
 registro\_detenuto & A & 1 & S \\
 REGISTRO\_DETENZIONE & E & 1 & S \\
 trasf\_detenuto & A & 1 & S \\
 TRASFERIMENTO\_LETTO & E & 1 & S \\
-assegnazione\_letto A & 1 & S \\
-LETTO E & 1 & S \\
+assegnazione\_letto & A & 1 & S \\
+CELLA & E & 200 & L \\
+TRASFERIMENTO\_LETTO & E & 2 & L \\
+CELLA & E & 1 & S
 \end{tabular}
 \end{table}
-Come si può notare, si aggiunge una scrittura a LETTO per aggiornare l'attributo "posti\_occupati".
+Come si può notare, si aggiungono due letture di TRASFERIMENTO\_LETTO per contare i nuovi occupanti e poi si aggiunge una scrittura a CELLA (in precedenza LETTO) per aggiornare l'attributo "posti\_occupati".
+\\
+Si semplificano così anche le operazione d'isolamento di un detenuto e ricovero che non necessitano la lettura di tutti i record ISOLAMENTO e RICOVERO corrispondenti.
+\section{Traduzione di entità e associazioni in relazioni}
+detenuto(\underline{carta\_di\_identita}, nome, cognome, data\_di\_nascita, altezza, deceduto)
+\\
+registro\_detenzione(\underline{inizio\_detenzione}, fine\_detenzione, \underline{carta\_di\_identita: detenuto})
+\\
+trasferimento\_letto(\underline{data\_entrata}, data\_uscita*, \underline{inizio\_detenzione: registro\_detenzione}, \underline{id\_blocco: cella}, \underline{id\_piano: cella}, \underline{id\_cella: cella})
+\\
+isolamento(\underline{data\_inizio}, data\_fine, \underline{inizio\_detenzione: registro\_detenzione}, \underline{id\_blocco: cella}, \underline{id\_piano: cella}, \underline{id\_cella: cella}, motivo)
+\\
+ricovero(\underline{data\_inizio}, data\_fine, \underline{inizio\_detenzione: registro\_detenzione}, \underline{id\_blocco: cella}, \underline{id\_piano: cella}, \underline{id\_cella: cella}, dettaglio)
+\\
+cella(\underline{id\_blocco: piano}, \underline{id\_piano: piano}, \underline{id\_cella}, tipo, num\_letti, posti\_occupati)
+\\
+piano(\underline{id\_piano}, \underline{id\_blocco: blocco})
+\\
+blocco(\underline{id\_blocco})
+\\
+personale(\underline{badge}, nome, cognome, codice\_fiscale, sesso)
+\\
+amministratore(\underline{badge: personale}, password)
+\\
+guardia(\underline{badge: personale})
+\\
+registro\_orari(\underline{data\_inizio}, \underline{badge: guardia}, \underline{giorno: orario}, data\_fine*)
+\\
+orario(\underline{giorno}, \underline{ora\_inizio: turno})
+\\
+turno(\underline{ora\_inizio}, ora\_fine)
+\section{Schema relazionale finale}
+\includepdf[pages={1}, landscape=true, scale=1]{./images/schema_logico_finale.pdf}
+\section{Traduzione delle operazioni in query SQL}
+\subsection{Inserimento nuovo detenuto}
+\begin{minted}[linenos, breaklines]{sql}
+INSERT INTO detenuto (nome, cognome, data_di_nascita, carta_di_identita, altezza)
+VALUES ($1, $2, $3, $4, $5);
+INSERT INTO registro_detenzione (carta_di_identita, inizio_detenzione, fine_detenzione)
+VALUES ($1, $2, $3);
+INSERT INTO trasferimento_letto (data_entrata, id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita)
+VALUES ($1, $2, $3, $4, $5, $6);
+\end{minted}
+Aggiornare i posti occupati
+\begin{minted}[linenos, firstnumber=last, breaklines]{sql}
+SELECT COUNT(data_entrata) as occupanti
+FROM trasferimento_letto
+WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita IS NULL;
+
+UPDATE cella
+SET posti_occupati = $1
+WHERE id_blocco = $2 AND id_piano = $3 AND id_cella = $4;
+\end{minted}
+\subsection{Scambio posto letto con un altro detenuto}
+\begin{minted}[linenos, breaklines]{sql}
+-- Imposto la data uscita a ora
+UPDATE trasferimento_letto t
+SET data_uscita = NOW()
+WHERE t.carta_di_identita = $1 AND data_uscita IS NULL;
+
+INSERT INTO trasferimento_letto (data_entrata, id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita)
+VALUES (NOW(), $1, $2, $3, (SELECT inizio_detenzione
+FROM registro_detenzione r
+WHERE r.carta_di_identita = $4
+ORDER BY r.inizio_detenzione DESC LIMIT 1), $4);
+-- Aggiorno i posti occupati
+SELECT COUNT(data_entrata) as occupanti
+FROM trasferimento_letto
+WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND data_uscita IS NULL;
+
+UPDATE cella
+SET posti_occupati = $1
+WHERE id_blocco = $2 AND id_piano = $3 AND id_cella = $4;
+\end{minted}
+\subsection{Ricoverare un detenuto}
+\begin{minted}[linenos, breaklines]{sql}
+INSERT INTO ricovero (id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita, data_inizio, data_fine, dettaglio)
+VALUES($1, $2, $3, $4, $5, NOW(), $6, $7);
+-- Conto i posti occupati
+SELECT COUNT(data_inizio) as occupanti
+FROM medica
+WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND NOW() BETWEEN data_inizio AND data_fine;
+
+UPDATE cella
+SET posti_occupati = $1
+WHERE id_blocco = $2 AND id_piano = $3 AND id_cella = $4;
+\end{minted}
+\subsection{Isolare un detenuto}
+\begin{minted}[linenos, breaklines]{sql}
+INSERT INTO isolamento (id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita, data_inizio, data_fine, motivo)
+VALUES($1, $2, $3, $4, $5, NOW(), $6, $7)
+-- Conto i posti occupati
+SELECT COUNT(data_inizio) as occupanti
+FROM isolamento
+WHERE id_blocco = $1 AND id_piano = $2 AND id_cella = $3 AND NOW() BETWEEN data_inizio AND data_fine;
+
+UPDATE cella
+SET posti_occupati = $1
+WHERE id_blocco = $2 AND id_piano = $3 AND id_cella = $4;
+\end{minted}
+\subsection{Inserimento nuova guardia}
+\begin{minted}[linenos, breaklines]{sql}
+INSERT INTO personale (badge, nome, cognome, codice_fiscale, sesso)
+VALUES ($1, $2, $3, $4, $5);
+INSERT INTO guardia (badge)
+VALUES ($1);
+\end{minted}
+\subsection{Inserimento nuovo amministratore}
+\begin{minted}[linenos, breaklines]{sql}
+INSERT INTO personale (badge, nome, cognome, codice_fiscale, sesso)
+VALUES ($1, $2, $3, $4, $5);
+INSERT INTO amministratore (badge, password)
+VALUES ($1, $2);
+\end{minted}
+\subsection{Visualizzare il personale (amministratori, guardie)}
+\begin{minted}[linenos, breaklines]{sql}
+ SELECT p.badge as "Badge", p.nome as "Nome", p.cognome as "Cognome", p.codice_fiscale as "Codice fiscale", p.sesso as "Sesso", 
+    (SELECT COUNT(*) AS num
+    FROM guardia g
+    WHERE p.badge = g.badge) AS "Guardia",
+    (SELECT COUNT(*) AS num
+    FROM amministratore a
+    WHERE p.badge = a.badge) AS "Amministratore"
+FROM personale p;
+\end{minted}
+\subsection{Visualizzare la lista dei detenuti presenti}
+\begin{minted}[linenos, breaklines]{sql}
+SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) as "Cognome", r.inizio_detenzione AS "Inizio", r.fine_detenzione AS "Fine", CONCAT(t.id_blocco, t.id_piano, '-', t.id_cella) AS "Cella"
+FROM registro_detenzione r
+JOIN detenuto d ON r.carta_di_identita = d.carta_di_identita
+JOIN trasferimento_letto t ON r.inizio_detenzione = t.inizio_detenzione AND r.carta_di_identita = t.carta_di_identita
+WHERE NOW() BETWEEN r.inizio_detenzione AND r.fine_detenzione AND d.deceduto IS NOT TRUE AND t.data_uscita IS NULL
+ORDER BY t.data_entrata DESC;
+\end{minted}
+\subsection{Visualizzare l'andamento settimanale di nuovi detenuti}
+\begin{minted}[linenos, breaklines]{sql}
+SELECT inizio_detenzione AS "date", COUNT(carta_di_identita) AS "numero"
+FROM registro_detenzione
+WHERE inizio_detenzione BETWEEN DATE(NOW()) - 7 AND DATE(NOW())
+GROUP BY inizio_detenzione
+ORDER BY inizio_detenzione ASC
+\end{minted}
+\subsection{Visualizzare i primi cinque detenuti che sono stati trasferiti in celle solitarie più volte}
+\begin{minted}[linenos, breaklines]{sql}
+SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) AS "Cognome", COUNT(i.carta_di_identita) AS num
+FROM isolamento i
+JOIN detenuto d ON i.carta_di_identita = d.carta_di_identita
+GROUP BY i.carta_di_identita
+ORDER BY num DESC
+LIMIT 5
+\end{minted}
+\subsection{Inserimento nuovo orario}
+\begin{minted}[linenos, breaklines]{sql}
+INSERT INTO registro_orari (badge, data_inizio, data_fine, giorno, ora_inizio, id_blocco, id_piano)
+VALUES ($1, $2, $3, $4, $5, $6, $7);
+\end{minted}
 \end{document}
