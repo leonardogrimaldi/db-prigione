@@ -65,7 +65,7 @@ function TableOrario({params}: {
     params: PersonaleOrario[]
 }) {
     return (
-        <div className="grid grid-cols-8 grid-rows-4 w-max bg-blue-200 rounded-md w-fit">
+        <div className="grid grid-cols-8 grid-rows-4 bg-blue-200 rounded-md w-fit">
                 <div></div>
                 {['Lunedì','Martedì', 'Mercoledì','Giovedì','Venerdì','Sabato','Domenica'].map(d => {
                     return <div className="border-l-4 border-gray-100 flex items-center justify-center">{d}</div>

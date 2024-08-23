@@ -461,4 +461,25 @@ LIMIT 5
 INSERT INTO registro_orari (badge, data_inizio, data_fine, giorno, ora_inizio, id_blocco, id_piano)
 VALUES ($1, $2, $3, $4, $5, $6, $7);
 \end{minted}
+\section{Progettazione dell'applicazione}
+\begin{figure}[H]
+\caption{Disegno della pagina detenuto e le finestre di ricovero e trasferimento}
+\includegraphics[scale=0.6]{progettazione_applicazione.png}
+\end{figure}
+L'applicazione è sta creata utilizzando il framework NextJS, che ha consentito di produrre una web-app full stack.
+%
+Per connettersi al database ed effettuare le query si è utilizzato il package chiamato `node-postgres'.
+%
+Si è fatto anche uso di framework per il frontend come TailwindCSS per il layout e lo stile e Mui X charts per i grafici.
+%
+In alcuni casi è stata utilizzata anche la libreria `zod' per validare l'input dell'utente attraverso i form.
+%
+Il linguaggio utilizzato nel codice è TypeScript, versione tipizzata di JavaScript
+\\
+\begin{figure}[H]
+\includegraphics[scale=0.5]{progettazione_orari.png}
+\caption{Disegno della pagina orario}  
+\end{figure}
+
+\subsection{Screenshot interfaccia utente}
 \end{document}
