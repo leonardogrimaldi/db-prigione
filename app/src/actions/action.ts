@@ -98,6 +98,21 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
     INSERT INTO trasferimento_letto (data_entrata, id_blocco, id_piano, id_cella, inizio_detenzione, carta_di_identita)
     VALUES ($1, $2, $3, $4, $5, $6);
     `
+    /**
+         * Faccio il parse della stringa cella che l'utente invia, che sarà di tipo "A,3,1"
+         *  A: id_blocco
+         *  3: id_piano
+         *  1: id_cella
+         */
+    const parsedCellaCSV = formData.get('cella')?.toString().split(',')
+    if (parsedCellaCSV == undefined || parsedCellaCSV.length !== 3) {
+        throw new TypeError("Il valore della cella non è corretto")
+    }
+    const cella: Cella = CellaSchema.parse({
+        id_blocco: parsedCellaCSV[0],
+        id_piano: parsedCellaCSV[1],
+        id_cella: parsedCellaCSV[2]
+    })
     try {
         const detenuto: Detenuto = DetenutoSchema.parse({
             nome: formData.get('nome'),
@@ -110,21 +125,6 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
             carta_di_identita: detenuto.carta_di_identita,
             inizio_detenzione: formData.get('inizio_detenzione'),
             fine_detenzione: formData.get('fine_detenzione')
-        })
-        /**
-         * Faccio il parse della stringa cella che l'utente invia, che sarà di tipo "A,3,1"
-         *  A: id_blocco
-         *  3: id_piano
-         *  1: id_cella
-         */
-        const parsedCellaCSV = formData.get('cella')?.toString().split(',')
-        if (parsedCellaCSV == undefined || parsedCellaCSV.length !== 3) {
-            throw new TypeError("Il valore della cella non è corretto")
-        }
-        const cella: Cella = CellaSchema.parse({
-            id_blocco: parsedCellaCSV[0],
-            id_piano: parsedCellaCSV[1],
-            id_cella: parsedCellaCSV[2]
         })
         const trasferimento: Trasferimento_Letto = Trasferimento_Letto_Schema.parse({
             data_entrata: registro.inizio_detenzione
@@ -143,6 +143,7 @@ export async function nuovoDetenuto(state: any, formData: FormData) {
         console.log(e)
         return { error: e }
     } finally {
+        aggiornaPostiOccupatiNoClient(cella)
         await client.end()
     }
 }
@@ -703,7 +704,14 @@ export async function getAndamentoSettimanale(): Promise<GiornoCont[]> {
     return res.rows
 }
 
-export async function topCinqueSpostamentiSolitaria() {
+export interface SpostamentoSolitaria {
+    CDI: string,
+    Nome: string,
+    Cognome: string,
+    num: string
+}
+
+export async function topCinqueSpostamentiSolitaria(): Promise<SpostamentoSolitaria[]> {
     const client = await new Client()
     await client.connect()
     const query = 
@@ -711,9 +719,12 @@ export async function topCinqueSpostamentiSolitaria() {
     SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) AS "Cognome", COUNT(i.carta_di_identita) AS num
     FROM isolamento i
     JOIN detenuto d ON i.carta_di_identita = d.carta_di_identita
-    GROUP BY i.carta_di_identita
+    GROUP BY d.carta_di_identita
     ORDER BY num DESC
     LIMIT 5
     `
+
+    const res = await client.query<SpostamentoSolitaria>(query)
     await client.end()
+    return res.rows
 }

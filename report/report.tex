@@ -452,7 +452,7 @@ ORDER BY inizio_detenzione ASC
 SELECT d.carta_di_identita AS "CDI", TRIM(d.nome) AS "Nome", TRIM(d.cognome) AS "Cognome", COUNT(i.carta_di_identita) AS num
 FROM isolamento i
 JOIN detenuto d ON i.carta_di_identita = d.carta_di_identita
-GROUP BY i.carta_di_identita
+GROUP BY d.carta_di_identita
 ORDER BY num DESC
 LIMIT 5
 \end{minted}
@@ -475,11 +475,26 @@ Si è fatto anche uso di framework per il frontend come TailwindCSS per il layou
 In alcuni casi è stata utilizzata anche la libreria `zod' per validare l'input dell'utente attraverso i form.
 %
 Il linguaggio utilizzato nel codice è TypeScript, versione tipizzata di JavaScript
-\\
-\begin{figure}[H]
-\includegraphics[scale=0.5]{progettazione_orari.png}
-\caption{Disegno della pagina orario}  
-\end{figure}
 
+\begin{figure}[H]
+\caption{Disegno della pagina orario} 
+\includegraphics[width=\textheight,keepaspectratio, angle=90,origin=c]{progettazione_orari.png} 
+\end{figure}
 \subsection{Screenshot interfaccia utente}
+\begin{figure}[H]
+\caption{Pagina creazione orario}
+\includegraphics[width=\textheight, height=0.75\textwidth, keepaspectratio, angle=90,origin=c]{creazione_orario.png}  
+\end{figure}
+\begin{figure}[H]
+\caption{Pagina di visualizzazione degli orari}  
+\includegraphics[width=\textheight, keepaspectratio, angle=90,origin=c]{pagina-orario.png}
+\end{figure}
+\begin{figure}[H]
+\caption{Pagina detenuti}  
+\includegraphics[width=\textheight, keepaspectratio, angle=90,origin=c]{pagina_detenuti.png}
+\end{figure}
+\begin{figure}[H]
+\caption{Form isolamento di un detenuto}
+\includegraphics[width=\textheight, keepaspectratio, angle=90,origin=c]{pagina_isolamento.png}  
+\end{figure}
 \end{document}
