@@ -1,14 +1,15 @@
 # Avviare l'applicazione
 Installare node.js e tutte le dipendenze
+
 Creare un file .env all'interno della directory root /app con i seguenti dati per connettersi al database
-`
+```
 PGUSER=postgres
 PGPASSWORD=
 PGHOST=localhost
 PGPORT=5432
 PGDATABASE=db-prigione
-`
-Lanciare l'applicazione con npm run dev e aprire il sito su http://localhost:3000/dashboard
+```
+Lanciare l'applicazione con `npm run dev` e aprire il sito su http://localhost:3000/dashboard
 # db-prigione
 Gestionale di una prigione
 
